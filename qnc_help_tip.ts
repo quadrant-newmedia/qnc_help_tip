@@ -1,14 +1,14 @@
 /**
     TODO.
 
-    <help-tip> is for adding tooltips with help text.
+    <qnc-help-tip> is for adding tooltips with help text.
 
     It is an INLINE element.
 
     Required markup:
 
     ```
-    <help-tip data-help-text="The special term means...">
+    <qnc-help-tip data-help-text="The special term means...">
         some special term
         <button data-help-tip-toggler type="button">?</button>
     </help-tip>
@@ -17,7 +17,7 @@
     OR:
 
     ```
-    <help-tip data-help-html="[some html content for the tooltip, ESCAPED since it's in an html attribute]">
+    <qnc-help-tip data-help-html="[some html content for the tooltip, ESCAPED since it's in an html attribute]">
         some special term
         <button data-help-tip-toggler type="button">?</button>
     </help-tip>
@@ -27,7 +27,7 @@
 
     Note that we apply NO VISIBLE STYLES to the help-tip element until the user activates the tooltip.
 
-    The tooltip can only be activated by clicking the toggle button. Hovering over the <help-tip> is NOT sufficient to open it. We MIGHT implement an option to allow open-on-hover, but it will be strictly opt-in.
+    The tooltip can only be activated by clicking the toggle button. Hovering over the <qnc-help-tip> is NOT sufficient to open it. We MIGHT implement an option to allow open-on-hover, but it will be strictly opt-in.
 
     The tooltip uses a native html popover (with `popover=auto`). This means the tooltip can be "light dismissed" by clicking outside of it (including on the button which opened it) or pressing escape.
 
@@ -57,9 +57,8 @@
     - lazily attaches shadow dom when the toggle button is first clicked; it often won't be needed
     - checks current state in toggle button click; be sure to CLOSE the popover if currently open
     
-    Suggested styles for the popover:
+    The styles below are applied by default inside the shadow dom (anchor names are tree-scoped, so they must live there). Override them from outside with `qnc-help-tip::part(popover) { ... }`.
     ```
-        // fee free to change
         --margin: 5px;
         border: 1px solid black;
         background-color: white;
@@ -79,49 +78,102 @@
         position-try-fallbacks: flip-block;
         margin: var(--margin);
     ```
-    And on the help-tip itself:
+    And on the help-tip itself (via :host):
     ```
         anchor-name: --help-tip;
         anchor-scope: --help-tip;
     ```
  */
 export class QncHelpTip extends HTMLElement {
-    private _is_open: boolean;
-    private _shadow: HelpTipShadow | null = null;
+    private _popover: HTMLElement | null = null;
+
+    // This will be updated on toggle events AFTER a 0s timeout
+    // It helps us handle multiple events within the same event loop properly (eg. browser light-dismisses popover AND we receive a click event)
+    private _async_updated_is_open = false;
 
     constructor() {
         super();
-        this._is_open = false;
         this.addEventListener("click", (event: MouseEvent) => {
-            if (!event.target) return;
-            if (!(event.target instanceof HTMLElement)) return;
-            const toggle_button = event.target.closest(
-                "[data-help-tip-toggler]",
-            );
-            if (!toggle_button) return;
-            if (toggle_button.closest("qnc-help-tip") != this) return;
+            if (!this._get_toggle_button(event)) return;
+            if (this._async_updated_is_open) {
+                this._hide();
+            } else {
+                this._show();
+            }
         });
     }
-    toggle() {}
-    private _get_prepared_shadow(): HelpTipShadow {
-        if (this._shadow) return this._shadow;
+    connectedCallback() {
+        if (this.hasAttribute("open")) this._show();
+    }
+    private _get_toggle_button(event: Event): Element | null {
+        if (!(event.target instanceof Element)) return null;
+        const toggle_button = event.target.closest("[data-help-tip-toggler]");
+        if (!toggle_button) return null;
+        if (toggle_button.closest("qnc-help-tip") != this) return null;
+        return toggle_button;
+    }
+    private _show() {
+        const popover_element = this._get_prepared_popover();
+        const html = this.getAttribute("data-help-html");
+        if (html !== null) {
+            popover_element.innerHTML = html;
+        } else {
+            popover_element.textContent =
+                this.getAttribute("data-help-text") ?? "";
+        }
+        popover_element.showPopover();
+    }
+    private _hide() {
+        this._popover?.hidePopover();
+    }
+    private _get_prepared_popover(): HTMLElement {
+        if (this._popover) return this._popover;
         const shadow = this.attachShadow({ mode: "closed" });
-        const popover = document.createElement("undefined-custom-element"); // custom element with no styles or behaviour; used only so we have a transparent content model (meaning we can accept any content and can be used anywhere, so long as descendants don't violate content model of ancestors)")
+        const style = document.createElement("style");
+        style.textContent = POPOVER_CSS;
+        shadow.appendChild(style);
+        const popover = document.createElement("undefined-custom-element"); // custom element with no styles or behaviour; used only so we have a transparent content model (meaning we can accept any content and can be used anywhere, so long as descendants don't violate content model of ancestors)")  ; cspell: words behaviour
+        popover.setAttribute("popover", "auto");
+        popover.setAttribute("part", "popover");
+        popover.addEventListener("toggle", (event: ToggleEvent) => {
+            if (event.newState === "open") {
+                this.setAttribute("open", "");
+            } else {
+                this.removeAttribute("open");
+            }
+        });
         shadow.appendChild(popover);
         shadow.appendChild(document.createElement("slot"));
-        const help_tip_shadow = {
-            shadow: shadow,
-            popover_element: popover,
-        };
 
-        this._shadow = help_tip_shadow;
-        return help_tip_shadow;
+        this._popover = popover;
+        return popover;
     }
 }
 
-type HelpTipShadow = {
-    readonly shadow: ShadowRoot;
-    readonly popover_element: HTMLElement;
-};
+// display is set only for :popover-open, otherwise it would override the UA rule that hides closed popovers
+const POPOVER_CSS = `
+:host {
+    anchor-name: --help-tip;
+    anchor-scope: --help-tip;
+}
+[popover]:popover-open {
+    display: block;
+    --margin: 5px;
+    border: 1px solid black;
+    background-color: white;
+    padding: 0.5em 1em;
+    text-align: left;
+    max-width: 300px;
+    overflow: auto;
+    box-sizing: border-box;
+    max-height: calc(100vh - 2 * var(--margin));
+    inset: auto;
+    position: fixed;
+    position-anchor: --help-tip;
+    position-area: top;
+    position-try-fallbacks: flip-block;
+    margin: var(--margin);
+}
+`;
 
 customElements.define("qnc-help-tip", QncHelpTip);
