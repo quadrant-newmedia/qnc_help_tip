@@ -102,8 +102,40 @@ export class QncHelpTip extends HTMLElement {
             }
         });
     }
+
+    // React to changes in "open" attribute
+    static observedAttributes = ["open"];
+    attributeChangedCallback(
+        name: string,
+        old_value: string | null,
+        new_value: string | null,
+    ) {
+        const want_open = new_value !== null;
+
+        if (want_open) {
+            if (!this._popover_is_currently_open()) {
+                this._show();
+            }
+        } else {
+            if (this._popover_is_currently_open()) {
+                this._hide();
+            }
+        }
+    }
+
+    // Provide typed "open" property, which mirrors the attribute
+    get open() {
+        return this.hasAttribute("open");
+    }
+    set open(value: boolean) {
+        this.toggleAttribute("open", value);
+    }
+
     connectedCallback() {
         if (this.hasAttribute("open")) this._show();
+    }
+    private _popover_is_currently_open() {
+        return this._popover && this._popover.matches(":popover-open");
     }
     private _get_toggle_button(event: Event): Element | null {
         if (!(event.target instanceof Element)) return null;
@@ -136,11 +168,7 @@ export class QncHelpTip extends HTMLElement {
         popover.setAttribute("popover", "auto");
         popover.setAttribute("part", "popover");
         popover.addEventListener("toggle", (event: ToggleEvent) => {
-            if (event.newState === "open") {
-                this.setAttribute("open", "");
-            } else {
-                this.removeAttribute("open");
-            }
+            this.toggleAttribute("open", event.newState == "open");
         });
         shadow.appendChild(popover);
         shadow.appendChild(document.createElement("slot"));
