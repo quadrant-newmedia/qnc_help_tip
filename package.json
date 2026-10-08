@@ -8,9 +8,12 @@
   "main": "dist/qnc_help_tip.js",
   "scripts": {
     "build": "tsc",
+    "start": "tsc && concurrently -k -n tsc,server \"tsc -w --preserveWatchOutput\" \"http-server . -c-1 -o /tests/index.html\"",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "devDependencies": {
+    "concurrently": "^10.0.5",
+    "http-server": "^14.1.1",
     "typescript": "^7.0.2"
   }
 }

@@ -1,4 +1,5 @@
 /**
+    cspell: words FOUC
     TODO.
 
     <qnc-help-tip> is for adding tooltips with help text.
