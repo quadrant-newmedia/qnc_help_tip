@@ -185,6 +185,7 @@ export class QncHelpTip extends HTMLElement {
 }
 
 // display is set only for :popover-open, otherwise it would override the UA rule that hides closed popovers
+// other styles are always set on [popover], so specificity is low and users can override styles easily
 const POPOVER_CSS = `
 :host {
     anchor-name: --help-tip;
@@ -192,12 +193,16 @@ const POPOVER_CSS = `
 }
 [popover]:popover-open {
     display: block;
-    --margin: 5px;
+}
+[popover] {
+    --popover-margin: 5px;
+    --popover-max-width: 300px;
+    max-width: min(var(--popover-max-width), calc(100vw - 2 * var(--popover-margin)));
+
     border: 1px solid black;
     background-color: white;
     padding: 0.5em 1em;
     text-align: left;
-    max-width: 300px;
     overflow: auto;
     box-sizing: border-box;
     max-height: calc(100vh - 2 * var(--margin));
@@ -206,7 +211,7 @@ const POPOVER_CSS = `
     position-anchor: --help-tip;
     position-area: top;
     position-try-fallbacks: flip-block;
-    margin: var(--margin);
+    margin: var(--popover-margin);
 }
 `;
 

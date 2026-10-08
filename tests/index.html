@@ -45,6 +45,11 @@
         .right {
             text-align: right;
         }
+        .large-max-width-help-tip::part(popover) {
+            --popover-max-width: 1000px;
+            white-space: pre;
+        }
+
     </style>
 </head>
 <body>
@@ -142,18 +147,19 @@
 
     <div class="spacer"></div>
 
-    <div class="test" style="border-bottom: 0">
-        <h2>7. Near bottom of page</h2>
+    <div class="test">
+        <h2>6. Width is constrained</h2>
         <p class="expect">
-            Expect: with the page scrolled all the way to the bottom, the
-            pop-up opens on top of the term.
+            Expect: this is an extra-wide popover. If you resize the window, it becomes narrower as needed, so as not to overflow.
         </p>
-        <qnc-help-tip
-            data-help-text="Short help text. Scroll to the very bottom of the page before opening."
+        <qnc-help-tip class="large-max-width-help-tip"
+            data-help-text="Nisi reprehenderit cillum amet voluptate dolore amet dolor quis irure proident. Laboris cillum eu tempor aliquip mollit tempor exercitation pariatur anim nisi magna do. Deserunt veniam incididunt consequat pariatur esse do ullamco irure aute qui deserunt aliquip. Dolore et qui aute id eiusmod laboris aliquip qui ea velit aute dolor mollit. Exercitation deserunt dolore est aute qui labore. Elit officia qui minim proident laboris velit dolore amet do est ipsum ut cupidatat nostrud."
         >
-            bottom of page
+            keyboard to close
             <button data-help-tip-toggler type="button">?</button>
         </qnc-help-tip>
     </div>
+
+
 </body>
 </html>
