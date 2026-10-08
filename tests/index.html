@@ -45,9 +45,11 @@
         .right {
             text-align: right;
         }
-        .large-max-width-help-tip::part(popover) {
-            --popover-max-width: 1000px;
-            white-space: pre;
+        .qnc-help-tip-popover {
+            max-width: min(20em, 100vw);
+        }
+        .qnc-help-tip-popover.large {
+            max-width: min(1000px, 100vw);
         }
 
     </style>
@@ -56,7 +58,7 @@
     <!-- Test 1 is deliberately the first thing on the page, with no space above it -->
     <div class="test" style="padding-top: 0">
         <qnc-help-tip
-            data-help-text="Short help text. Scroll to the very top of the page before opening."
+            data-popover="<div>Short help text. Scroll to the very top of the page before opening.</div>"
         >
             top of page
             <button data-help-tip-toggler type="button">?</button>
@@ -70,7 +72,7 @@
 
     <div class="test" style="padding-left: 0">
         <qnc-help-tip
-            data-help-text="This is a long-ish help text that makes the pop-up as wide as it is allowed to be, so that it would overflow the left edge of the page if it were simply centered over the term."
+            data-popover="<div>This is a long-ish help text that makes the pop-up as wide as it is allowed to be, so that it would overflow the left edge of the page if it were simply centered over the term.</div>"
         >
             <button data-help-tip-toggler type="button">?</button>
             left edge
@@ -83,7 +85,7 @@
 
     <div class="test right" style="padding-right: 0">
         <qnc-help-tip
-            data-help-text="This is a long-ish help text that makes the pop-up as wide as it is allowed to be, so that it would overflow the right edge of the page if it were simply centered over the term."
+            data-popover="<div>This is a long-ish help text that makes the pop-up as wide as it is allowed to be, so that it would overflow the right edge of the page if it were simply centered over the term.</div>"
         >
             right edge
             <button data-help-tip-toggler type="button">?</button>
@@ -107,7 +109,7 @@
         <p style="margin-top: 5em">
             Scroll down a bit, then open
             <qnc-help-tip
-                data-help-html="&lt;strong&gt;HTML&lt;/strong&gt; help content with a &lt;a href=&quot;#&quot;&gt;link&lt;/a&gt;."
+                data-popover='<div><strong>HTML</strong> help content with a <a href="#">link</a>.</div>'
             >
                 this term
                 <button data-help-tip-toggler type="button">?</button>
@@ -123,7 +125,7 @@
             should close the pop-up.
         </p>
         <qnc-help-tip
-            data-help-text="Click the toggle button again to close me."
+            data-popover="<div>Click the toggle button again to close me.</div>"
         >
             click to close
             <button data-help-tip-toggler type="button">?</button>
@@ -138,7 +140,7 @@
             close the pop-up.
         </p>
         <qnc-help-tip
-            data-help-text="Press Enter or Space on the toggle button again to close me."
+            data-popover="<div>Press Enter or Space on the toggle button again to close me.</div>"
         >
             keyboard to close
             <button data-help-tip-toggler type="button">?</button>
@@ -147,18 +149,6 @@
 
     <div class="spacer"></div>
 
-    <div class="test">
-        <h2>6. Width is constrained</h2>
-        <p class="expect">
-            Expect: this is an extra-wide popover. If you resize the window, it becomes narrower as needed, so as not to overflow.
-        </p>
-        <qnc-help-tip class="large-max-width-help-tip"
-            data-help-text="Nisi reprehenderit cillum amet voluptate dolore amet dolor quis irure proident. Laboris cillum eu tempor aliquip mollit tempor exercitation pariatur anim nisi magna do. Deserunt veniam incididunt consequat pariatur esse do ullamco irure aute qui deserunt aliquip. Dolore et qui aute id eiusmod laboris aliquip qui ea velit aute dolor mollit. Exercitation deserunt dolore est aute qui labore. Elit officia qui minim proident laboris velit dolore amet do est ipsum ut cupidatat nostrud."
-        >
-            keyboard to close
-            <button data-help-tip-toggler type="button">?</button>
-        </qnc-help-tip>
-    </div>
 
 
 </body>

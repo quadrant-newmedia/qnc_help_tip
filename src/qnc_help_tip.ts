@@ -1,46 +1,44 @@
 /**
     cspell: words FOUC
-    TODO.
 
-    <qnc-help-tip> is for adding tooltips with help text.
+    <qnc-help-tip> is for adding popovers with help text.
 
     It is an INLINE element.
 
     Required markup:
 
     ```
-    <qnc-help-tip data-help-text="The special term means...">
+    <qnc-help-tip data-popover="<div>The special term means...</div>">
         some special term
         <button data-help-tip-toggler type="button">?</button>
     </help-tip>
     ```
 
-    OR:
+    Note that the data-popover attribute must specify the html of exactly one element. This will become the popover. We will set a few extra key attributes/styles on it.
 
-    ```
-    <qnc-help-tip data-help-html="[some html content for the tooltip, ESCAPED since it's in an html attribute]">
-        some special term
-        <button data-help-tip-toggler type="button">?</button>
-    </help-tip>
-    ```
+    Other than positioning the popover, we apply no styles to it. We apply a 'qnc-help-tip-popover' class, and recommend you use that to style them all as you see fit. The popover will be created lazily, and appended to the body element. The popover will be destroyed as soon as it is closed.
 
     The element with the `data-help-tip-toggler` button is called the "toggle button". You can actually have as many of these as you want, in any DOM position within the help-tip. They can be styled however you want.
 
-    Note that we apply NO VISIBLE STYLES to the help-tip element until the user activates the tooltip.
+    Note that we apply NO VISIBLE STYLES to the help-tip element until the user activates the popover.
 
-    The tooltip can only be activated by clicking the toggle button. Hovering over the <qnc-help-tip> is NOT sufficient to open it. We MIGHT implement an option to allow open-on-hover, but it will be strictly opt-in.
+    The popover can only be activated by clicking one of the toggle buttons. Hovering over the <qnc-help-tip> is NOT sufficient to open it. We MIGHT implement an option to allow open-on-hover, but it will be strictly opt-in. And if we do, we'll have to implement (intelligent) close-on-mouse-out (it's confusing to users if it opens on hover and can't be closed by moving mouse away).
 
-    The tooltip uses a native html popover (with `popover=auto`). This means the tooltip can be "light dismissed" by clicking outside of it (including on the button which opened it) or pressing escape.
+    The popover uses a native html popover (with `popover=auto`). This means the popover can be "light dismissed" by clicking outside of it (including on the button which opened it) or pressing escape.
 
-    While the tooltip is active, the element will have an "open" attribute set. You can use this in your stylesheet to identify the "bounds" of the help-tip, by applying background, underline, etc. You can also set the open attribute via html to have the help tip appear open, initially (will cause FOUC, though).
+    While the popover is active, the element will have an "open" attribute set. You can use this in your stylesheet to visually identify the bounds of the help-tip, by applying background, underline, etc. You can also set the open attribute via html to have the help tip open immediately (will cause FOUC, though).
 
-    The tooltip is NOT modal. You can still interact with other elements while the tooltip is active (including elements within the help-tip).
+    The popover is NOT modal. You can still interact with other elements while the popover is active (including elements within the help-tip). External clicks will close the popover, but they will NOT be blocked.
 
-    The contents of the help-tip (apart from the `data-help-tip-toggler` button) MAY be interactive (and have their own hover/click/keydown listeners). The only element on which we listen for events is the toggle button.
+    The contents of the qnc-help-tip (apart from the `data-help-tip-toggler` button) MAY be interactive (and have their own hover/click/keydown listeners). The only element on which we listen for events is the toggle button.
 
-    The tooltip will be displayed centered above the help-tip, when space permits. If there is insufficient space above, it will be displayed below.
+    The popover will be displayed centered above the help-tip, when space permits. If there is insufficient space above, it will be displayed below.
 
-    The tooltip does NOT prevent scrolling. It uses CSS anchor positioning, so the tooltip will stay next to its help-tip while scrolling.
+    The popover does NOT prevent scrolling. It uses CSS anchor positioning, so the popover will stay next to its help-tip while scrolling.
+
+
+    Programmatic control/events:
+    Similar to a native details element, we respond to an "open" attribute and property. We also dispatch toggle events AFTER our openness changes. We do not dispatch beforetoggle, however.
 
     Browser requirements:
     - pretty much any modern browser, except for stripped-down mobile browsers
@@ -54,165 +52,133 @@
     Later, we MIGHT implement support for a `--help-tip-alignment` custom css property, which lets you specify preferred sides for the popover.
 
     Implementation notes:
-    - puts the tooltip/popover inside our own shadow dom, so as not to "mess with" any external elements
-    - lazily attaches shadow dom when the toggle button is first clicked; it often won't be needed
-    - checks current state in toggle button click; be sure to CLOSE the popover if currently open
-    
-    The styles below are applied by default inside the shadow dom (anchor names are tree-scoped, so they must live there). Override them from outside with `qnc-help-tip::part(popover) { ... }`.
-    ```
-        --margin: 5px;
-        border: 1px solid black;
-        background-color: white;
-        padding: 0.5em 1em;
-        text-align: left;
-        max-width: 300px;
+    - lazily creates the popover, and destroys it as soon as it is closed
+    - checks current state in toggle button click; if popover was "recently" open, be sure to close the popover; track "recently" open by toggling a boolean in a 0s timeout after the toggle event
+    - dynamically generates a unique anchor name when the popover is opened
+    - sets key positioning styles directly on the popover, but otherwise leaves it unstyled
 
-        // support scrolling if content requires it
-        overflow: auto;
-        box-sizing: border-box;
-        max-height: calc(100vh - 2 * var(--margin));
-
-        inset: auto; // necessary for position-try-fallbacks to work on a popover element
-        position: fixed;
-        position-anchor: --help-tip;
-        position-area: top;
-        position-try-fallbacks: flip-block;
-        margin: var(--margin);
-    ```
-    And on the help-tip itself (via :host):
-    ```
-        anchor-name: --help-tip;
-        anchor-scope: --help-tip;
-    ```
  */
 export class QncHelpTip extends HTMLElement {
-    private _popover: HTMLElement | null = null;
+    static observedAttributes = ["open"];
 
-    // This will be updated on toggle events AFTER a 0s timeout
-    // It helps us handle multiple events within the same event loop properly (eg. browser light-dismisses popover AND we receive a click event)
-    private _async_updated_is_open = false;
+    static #nextId = 0;
+
+    #popover: HTMLElement | null = null;
+    // This will be updated in a 0s timeout after toggle events
+    // It helps us identify when multiple simultaneous things trigger the closing of the popover
+    #asyncUpdatedIsOpen = false;
 
     constructor() {
         super();
-        this.addEventListener("click", (event: MouseEvent) => {
-            console.log("handling click");
-            if (!this._get_toggle_button(event)) return;
-            if (this._async_updated_is_open) {
-                this._hide();
-            } else {
-                this._show();
-            }
+        // Delegated, so toggle buttons can be anywhere within us, even if added later.
+        this.addEventListener("click", (event) => {
+            const target = event.target;
+            if (!(target instanceof Element)) return;
+            const toggler = target.closest("[data-help-tip-toggler]");
+            if (!toggler || toggler.closest("qnc-help-tip") !== this) return;
+            this.#onTogglerClick();
         });
     }
 
-    // React to changes in "open" attribute
-    static observedAttributes = ["open"];
-    attributeChangedCallback(
-        name: string,
-        old_value: string | null,
-        new_value: string | null,
-    ) {
-        const want_open = new_value !== null;
+    connectedCallback() {
+        if (this.hasAttribute("open")) this.#open();
+    }
 
-        if (want_open) {
-            if (!this._popover_is_currently_open()) {
-                this._show();
-            }
+    disconnectedCallback() {
+        this.#popover?.hidePopover();
+        this.#popover?.remove();
+        this.#popover = null;
+        this.style.removeProperty("anchor-name");
+    }
+
+    attributeChangedCallback(name: string) {
+        if (name !== "open" || !this.isConnected) return;
+        if (this.hasAttribute("open")) {
+            this.#open();
         } else {
-            if (this._popover_is_currently_open()) {
-                this._hide();
-            }
+            this.#popover?.hidePopover();
+            this.#popover?.remove();
+            this.#popover = null;
+            this.style.removeProperty("anchor-name");
         }
     }
 
-    // Provide typed "open" property, which mirrors the attribute
+    // sync open attribute with a property
     get open() {
-        return this.hasAttribute("open");
+        return Boolean(this.#popover?.matches(":popover-open"));
     }
     set open(value: boolean) {
         this.toggleAttribute("open", value);
     }
 
-    connectedCallback() {
-        if (this.hasAttribute("open")) this._show();
+    #onTogglerClick() {
+        this.toggleAttribute("open", !this.#asyncUpdatedIsOpen);
     }
-    private _popover_is_currently_open() {
-        return this._popover && this._popover.matches(":popover-open");
-    }
-    private _get_toggle_button(event: Event): Element | null {
-        if (!(event.target instanceof Element)) return null;
-        const toggle_button = event.target.closest("[data-help-tip-toggler]");
-        if (!toggle_button) return null;
-        if (toggle_button.closest("qnc-help-tip") != this) return null;
-        return toggle_button;
-    }
-    private _show() {
-        const popover_element = this._get_prepared_popover();
-        const html = this.getAttribute("data-help-html");
-        if (html !== null) {
-            popover_element.innerHTML = html;
-        } else {
-            popover_element.textContent =
-                this.getAttribute("data-help-text") ?? "";
+
+    #open() {
+        // Clean up any already-existing popover
+        if (this.#popover) {
+            this.#popover.hidePopover();
+            this.#popover.remove();
         }
-        popover_element.showPopover();
-    }
-    private _hide() {
-        this._popover?.hidePopover();
-    }
-    private _get_prepared_popover(): HTMLElement {
-        if (this._popover) return this._popover;
-        const shadow = this.attachShadow({ mode: "closed" });
-        const style = document.createElement("style");
-        style.textContent = POPOVER_CSS;
-        shadow.appendChild(style);
-        const popover = document.createElement("undefined-custom-element"); // custom element with no styles or behaviour; used only so we have a transparent content model (meaning we can accept any content and can be used anywhere, so long as descendants don't violate content model of ancestors)")  ; cspell: words behaviour
+
+        const html = this.dataset["popover"] ?? "";
+        const template = document.createElement("template");
+        template.innerHTML = html;
+        if (template.content.children.length !== 1) {
+            console.error(
+                "qnc-help-tip: data-popover must contain exactly one element",
+                this,
+            );
+            this.removeAttribute("open");
+            return;
+        }
+        const popover = template.content.firstElementChild;
+        if (!(popover instanceof HTMLElement)) {
+            console.error(
+                "qnc-help-tip: data-popover must contain exactly one element",
+                this,
+            );
+            this.removeAttribute("open");
+            return;
+        }
+
+        const anchorName = `--qnc-help-tip-${QncHelpTip.#nextId++}`;
+        this.style.setProperty("anchor-name", anchorName);
+
+        popover.classList.add("qnc-help-tip-popover");
         popover.setAttribute("popover", "auto");
-        popover.setAttribute("part", "popover");
-        popover.addEventListener("toggle", (event: ToggleEvent) => {
-            const now_open = event.newState == "open";
-            setTimeout(() => {
-                this._async_updated_is_open = now_open;
-            });
-            this.toggleAttribute("open", now_open);
-        });
-        shadow.appendChild(popover);
-        shadow.appendChild(document.createElement("slot"));
+        popover.style.setProperty("position-anchor", anchorName);
+        popover.style.setProperty("position-area", "top");
+        popover.style.setProperty("justify-self", "anchor-center");
+        popover.style.setProperty("position-try-fallbacks", "flip-block");
+        popover.style.setProperty("inset", "auto");
+        // Browsers set margin to auto by default to center the popover; clear that
+        // Users are still free to override this
+        popover.style.setProperty("margin", "0");
 
-        this._popover = popover;
-        return popover;
+        popover.addEventListener("toggle", (event: ToggleEvent) => {
+            const isOpen = event.newState == "open";
+            if (!isOpen) {
+                // this might have been triggered by light-dismissal, might have been triggered by one of our own .hidePopover() calls
+                this.#popover?.hidePopover();
+                this.#popover?.remove();
+                this.#popover = null;
+                this.style.removeProperty("anchor-name");
+                this.removeAttribute("open");
+            }
+            setTimeout(() => {
+                this.#asyncUpdatedIsOpen = isOpen;
+            });
+            this.dispatchEvent(
+                new Event("toggle", { bubbles: true, cancelable: false }),
+            );
+        });
+
+        document.body.append(popover);
+        this.#popover = popover;
+        popover.showPopover();
     }
 }
-
-// display is set only for :popover-open, otherwise it would override the UA rule that hides closed popovers
-// other styles are always set on [popover], so specificity is low and users can override styles easily
-const POPOVER_CSS = `
-:host {
-    anchor-name: --help-tip;
-    anchor-scope: --help-tip;
-}
-[popover]:popover-open {
-    display: block;
-}
-[popover] {
-    --popover-margin: 5px;
-    --popover-max-width: 300px;
-    max-width: min(var(--popover-max-width), calc(100vw - 2 * var(--popover-margin)));
-
-    border: 1px solid black;
-    background-color: white;
-    padding: 0.5em 1em;
-    text-align: left;
-    overflow: auto;
-    box-sizing: border-box;
-    max-height: calc(100vh - 2 * var(--margin));
-    inset: auto;
-    position: fixed;
-    position-anchor: --help-tip;
-    position-area: top;
-    position-try-fallbacks: flip-block;
-    margin: var(--popover-margin);
-}
-`;
 
 customElements.define("qnc-help-tip", QncHelpTip);
