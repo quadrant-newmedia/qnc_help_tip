@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>qnc-help-tip manual tests</title>
+    <script type="module" src="/dist/qnc_help_tip.js"></script>
+    <style>
+        body {
+            margin: 0;
+            font-family: sans-serif;
+        }
+        h2 {
+            font-size: 1em;
+            margin: 0 0 0.25em;
+        }
+        .test {
+            padding: 1em;
+            border-bottom: 1px dashed #999;
+        }
+        .expect {
+            margin: 0;
+            color: #555;
+            font-size: 0.85em;
+        }
+        .spacer {
+            height: 150vh;
+            background: repeating-linear-gradient(
+                #f4f4f4,
+                #f4f4f4 50px,
+                #e4e4e4 50px,
+                #e4e4e4 100px
+            );
+        }
+        qnc-help-tip[open] {
+            background: #ffe9a8;
+            border-bottom: 1px dotted black;
+        }
+        qnc-help-tip button {
+            border-radius: 50%;
+            width: 1.5em;
+            height: 1.5em;
+            padding: 0;
+        }
+        .right {
+            text-align: right;
+        }
+    </style>
+</head>
+<body>
+    <!-- Test 1 is deliberately the first thing on the page, with no space above it -->
+    <div class="test" style="padding-top: 0">
+        <qnc-help-tip
+            data-help-text="Short help text. Scroll to the very top of the page before opening."
+        >
+            top of page
+            <button data-help-tip-toggler type="button">?</button>
+        </qnc-help-tip>
+        <h2>1. Near top of page</h2>
+        <p class="expect">
+            Expect: with the page scrolled to the top, the pop-up opens
+            underneath the term.
+        </p>
+    </div>
+
+    <div class="test" style="padding-left: 0">
+        <qnc-help-tip
+            data-help-text="This is a long-ish help text that makes the pop-up as wide as it is allowed to be, so that it would overflow the left edge of the page if it were simply centered over the term."
+        >
+            <button data-help-tip-toggler type="button">?</button>
+            left edge
+        </qnc-help-tip>
+        <h2>2. Near left edge of page</h2>
+        <p class="expect">
+            Expect: pop-up does not overflow the left edge of the page.
+        </p>
+    </div>
+
+    <div class="test right" style="padding-right: 0">
+        <qnc-help-tip
+            data-help-text="This is a long-ish help text that makes the pop-up as wide as it is allowed to be, so that it would overflow the right edge of the page if it were simply centered over the term."
+        >
+            right edge
+            <button data-help-tip-toggler type="button">?</button>
+        </qnc-help-tip>
+        <h2>3. Near right edge of page</h2>
+        <p class="expect">
+            Expect: pop-up does not overflow the right edge of the page.
+        </p>
+    </div>
+
+    <div class="spacer"></div>
+
+    <div class="test">
+        <h2>4. Anchored while scrolling</h2>
+        <p class="expect">
+            Expect: open the pop-up, then scroll (wheel / trackpad / keyboard).
+            The pop-up stays attached to the term, and flips above/below as
+            the term nears the viewport edges. Click the term's button
+            again, click elsewhere, or press Escape to close.
+        </p>
+        <p style="margin-top: 5em">
+            Scroll down a bit, then open
+            <qnc-help-tip
+                data-help-html="&lt;strong&gt;HTML&lt;/strong&gt; help content with a &lt;a href=&quot;#&quot;&gt;link&lt;/a&gt;."
+            >
+                this term
+                <button data-help-tip-toggler type="button">?</button>
+            </qnc-help-tip>
+            and keep scrolling.
+        </p>
+    </div>
+
+    <div class="test">
+        <h2>5. Closing with mouse click</h2>
+        <p class="expect">
+            Expect: clicking the toggle button while the pop-up is open
+            should close the pop-up.
+        </p>
+        <qnc-help-tip
+            data-help-text="Click the toggle button again to close me."
+        >
+            click to close
+            <button data-help-tip-toggler type="button">?</button>
+        </qnc-help-tip>
+    </div>
+
+    <div class="test">
+        <h2>6. Closing with keyboard</h2>
+        <p class="expect">
+            Expect: activating the toggle button via the keyboard (focus it
+            with Tab, press Enter or Space) while the pop-up is open should
+            close the pop-up.
+        </p>
+        <qnc-help-tip
+            data-help-text="Press Enter or Space on the toggle button again to close me."
+        >
+            keyboard to close
+            <button data-help-tip-toggler type="button">?</button>
+        </qnc-help-tip>
+    </div>
+
+    <div class="spacer"></div>
+
+    <div class="test" style="border-bottom: 0">
+        <h2>7. Near bottom of page</h2>
+        <p class="expect">
+            Expect: with the page scrolled all the way to the bottom, the
+            pop-up opens on top of the term.
+        </p>
+        <qnc-help-tip
+            data-help-text="Short help text. Scroll to the very bottom of the page before opening."
+        >
+            bottom of page
+            <button data-help-tip-toggler type="button">?</button>
+        </qnc-help-tip>
+    </div>
+</body>
+</html>

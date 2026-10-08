@@ -95,6 +95,7 @@ export class QncHelpTip extends HTMLElement {
     constructor() {
         super();
         this.addEventListener("click", (event: MouseEvent) => {
+            console.log("handling click");
             if (!this._get_toggle_button(event)) return;
             if (this._async_updated_is_open) {
                 this._hide();
@@ -169,7 +170,11 @@ export class QncHelpTip extends HTMLElement {
         popover.setAttribute("popover", "auto");
         popover.setAttribute("part", "popover");
         popover.addEventListener("toggle", (event: ToggleEvent) => {
-            this.toggleAttribute("open", event.newState == "open");
+            const now_open = event.newState == "open";
+            setTimeout(() => {
+                this._async_updated_is_open = now_open;
+            });
+            this.toggleAttribute("open", now_open);
         });
         shadow.appendChild(popover);
         shadow.appendChild(document.createElement("slot"));
