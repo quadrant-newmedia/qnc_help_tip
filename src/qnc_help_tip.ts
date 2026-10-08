@@ -8,15 +8,30 @@
     Required markup:
 
     ```
-    <qnc-help-tip data-popover="<div>The special term means...</div>">
+    <qnc-help-tip data-popover-text="...">
         some special term
         <button data-help-tip-toggler type="button">?</button>
     </help-tip>
     ```
 
-    Note that the data-popover attribute must specify the html of exactly one element. This will become the popover. We will set a few extra key attributes/styles on it.
+    OR
 
-    Other than positioning the popover, we apply no styles to it. We apply a 'qnc-help-tip-popover' class, and recommend you use that to style them all as you see fit. The popover will be created lazily, and appended to the body element. The popover will be destroyed as soon as it is closed.
+    ```
+    <qnc-help-tip data-popover-html="...">
+        some special term
+        <button data-help-tip-toggler type="button">?</button>
+    </help-tip>
+    ```
+
+    The popover content will be injected inside:
+
+    <div class="qnc-help-tip-popover">
+        <div>
+            [CONTENT]
+        </div>
+    </div>
+
+    The inner div is the "scroll container".
 
     The element with the `data-help-tip-toggler` button is called the "toggle button". You can actually have as many of these as you want, in any DOM position within the help-tip. They can be styled however you want.
 
@@ -51,12 +66,14 @@
 
     Later, we MIGHT implement support for a `--help-tip-alignment` custom css property, which lets you specify preferred sides for the popover.
 
+    
+
+
     Implementation notes:
     - lazily creates the popover, and destroys it as soon as it is closed
     - checks current state in toggle button click; if popover was "recently" open, be sure to close the popover; track "recently" open by toggling a boolean in a 0s timeout after the toggle event
     - dynamically generates a unique anchor name when the popover is opened
     - sets key positioning styles directly on the popover, but otherwise leaves it unstyled
-
  */
 export class QncHelpTip extends HTMLElement {
     static observedAttributes = ["open"];
@@ -122,29 +139,17 @@ export class QncHelpTip extends HTMLElement {
             this.#popover.remove();
         }
 
-        const html = this.dataset["popover"] ?? "";
-        const template = document.createElement("template");
-        template.innerHTML = html;
-        if (template.content.children.length !== 1) {
-            console.error(
-                "qnc-help-tip: data-popover must contain exactly one element",
-                this,
-            );
-            this.removeAttribute("open");
-            return;
-        }
-        const popover = template.content.firstElementChild;
-        if (!(popover instanceof HTMLElement)) {
-            console.error(
-                "qnc-help-tip: data-popover must contain exactly one element",
-                this,
-            );
-            this.removeAttribute("open");
-            return;
-        }
-
         const anchorName = `--qnc-help-tip-${QncHelpTip.#nextId++}`;
         this.style.setProperty("anchor-name", anchorName);
+
+        const popover = document.createElement("div");
+        const scroller = document.createElement("div");
+        scroller.setAttribute(
+            "style",
+            `
+            overflow: auto; min-width: 0; min-height: 0;
+        `,
+        );
 
         popover.classList.add("qnc-help-tip-popover");
         popover.setAttribute("popover", "auto");
@@ -155,7 +160,15 @@ export class QncHelpTip extends HTMLElement {
         popover.style.setProperty("inset", "auto");
         // Browsers set margin to auto by default to center the popover; clear that
         // Users are still free to override this
-        popover.style.setProperty("margin", "0");
+        // popover.style.setProperty("margin", "0");
+
+        popover.appendChild(scroller);
+        const html = this.getAttribute("data-popover-html");
+        if (html !== null) {
+            scroller.innerHTML = html;
+        } else {
+            scroller.textContent = this.getAttribute("data-popover-text") ?? "";
+        }
 
         popover.addEventListener("toggle", (event: ToggleEvent) => {
             const isOpen = event.newState == "open";
