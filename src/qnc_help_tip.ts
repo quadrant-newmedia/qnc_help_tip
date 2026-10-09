@@ -158,9 +158,6 @@ export class QncHelpTip extends HTMLElement {
         popover.style.setProperty("justify-self", "anchor-center");
         popover.style.setProperty("position-try-fallbacks", "flip-block");
         popover.style.setProperty("inset", "auto");
-        // Browsers set margin to auto by default to center the popover; clear that
-        // Users are still free to override this
-        // popover.style.setProperty("margin", "0");
 
         popover.appendChild(scroller);
         const html = this.getAttribute("data-popover-html");

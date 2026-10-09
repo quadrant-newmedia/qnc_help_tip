@@ -2,8 +2,10 @@
     --window-h-margin: 1em;
     --window-v-margin: 1em;
     border: 1px solid gray;
+    border-radius: 0.5em    ;
+    box-shadow: 3px 3px 6px 0 gray;
     background: white;
-    padding: 1em;
+    padding: 0.5em 1em;
     box-sizing: border-box;
 
     /* Note: this does NOT work perfectly on browsers with "space-taking" scroll bars; the scroll bar can cover up the margin and pop-over. This isn't usually a problem, though, since mobile browsers tend to have auto-hiding scrollbars and desktop browsers tend to be wider than 400px. */
@@ -11,7 +13,7 @@
 
     /* Note: this does NOT work perfectly on browsers with "space-taking" scroll bars; the scroll bar can cover up the margin and pop-over. This isn't usually a problem, though, since mobile browsers tend to have auto-hiding scrollbars and desktop browsers tend not to have horizontal scroll bars. */
     max-height: calc(100vh - 2 * var(--window-v-margin));
-    
+
     margin: var(--window-v-margin) var(--window-h-margin);
 
     /* this is the gap between the pop-over and the anchor (even when the popover flips to the bottom) */
