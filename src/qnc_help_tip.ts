@@ -212,7 +212,7 @@ customElements.define("qnc-help-tip", QncHelpTip);
 function checkStyles() {
     const styleVersion = getComputedStyle(
         document.documentElement,
-    ).getPropertyValue("--qnc-help-tip-version");
+    ).getPropertyValue("--qnc-help-tip-style-version");
 
     if (styleVersion != "1") {
         // Throw an error rather than just console.error; if the site has an error event listener (eg. for logging) we want to trigger it
