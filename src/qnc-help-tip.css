@@ -3,7 +3,7 @@
 
     - It looks reasonable with a very small amount of text
     - It looks reasonable with a large amount of text
-    - If you have a column of text using `white-space: nowrap` and it's wider than the viewport (or an image wider than the viewport), then the pop-over remains within the viewport and the whole content is available by scrolling the popover horizontally
+    - If you have a column of text using `white-space: nowrap` and it's wider than the viewport (or an image wider than the viewport), then the popover remains within the viewport and the whole content is available by scrolling the popover horizontally
     - If the content is higher than the viewport, the content scrolls vertically with the popover
 */
 
@@ -19,16 +19,16 @@
     box-sizing: border-box;
 
     /* You can change to `width: auto;` and use this value for max-width, if you prefer to let the popover become narrow when its content is narrow */
-    /* Note: this does NOT work perfectly on browsers with "space-taking" scroll bars; the scroll bar can cover up the margin and pop-over. This isn't usually a problem, though, since mobile browsers tend to have auto-hiding scrollbars and desktop browsers tend to be wider than 400px. */
+    /* Note: this does NOT work perfectly on browsers with "space-taking" scroll bars; the scroll bar can cover up the margin and popover. This isn't usually a problem, though, since mobile browsers tend to have auto-hiding scrollbars and desktop browsers tend to be wider than 400px. */
     width: min(400px, calc(100vw - 2 * var(--window-h-margin)));
 
-    /* Note: this does NOT work perfectly on browsers with "space-taking" scroll bars; the scroll bar can cover up the margin and pop-over. This isn't usually a problem, though, since mobile browsers tend to have auto-hiding scrollbars and desktop browsers tend not to have horizontal scroll bars. */
+    /* Note: this does NOT work perfectly on browsers with "space-taking" scroll bars; the scroll bar can cover up the margin and popover. This isn't usually a problem, though, since mobile browsers tend to have auto-hiding scrollbars and desktop browsers tend not to have horizontal scroll bars. */
     max-height: calc(100vh - 2 * var(--window-v-margin));
 
     /* If you change this, you might need to change width/height */
     margin: var(--window-v-margin) var(--window-h-margin);
 
-    /* this is the gap between the pop-over and the anchor (even when the popover flips to the bottom) */
+    /* this is the gap between the popover and the anchor (even when the popover flips to the bottom) */
     margin-bottom: 5px;
 }
 

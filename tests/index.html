@@ -60,7 +60,7 @@
         </qnc-help-tip>
         <h2>Near top of page</h2>
         <p class="expect">
-            Expect: with the page scrolled to the top, the pop-up opens
+            Expect: with the page scrolled to the top, the popover opens
             underneath the term.
         </p>
     </div>
@@ -68,7 +68,7 @@
     <div class="test">
         Wide min-content
         <p class="expect">
-            Expect: open the pop-up. It should not exceed the width of the window. Content should scroll within the inner scroller.
+            Expect: open the popover. It should not exceed the width of the window. Content should scroll within the inner scroller.
         </p>
         <qnc-help-tip
             data-popover-html="<div style='white-space: pre;'>Aliqua dolor consequat est officia amet veniam ut minim. Aute sit labore dolore ut cillum excepteur deserunt aliquip. Cupidatat quis proident adipisicing ad sunt proident tempor. Duis magna cillum duis occaecat eu consequat mollit. Ut eu exercitation magna irure est proident.</div>"
@@ -79,7 +79,7 @@
 
     <div class="test">
         HTML content
-        <p class="expect">Expect: the pop-up contains some bold text and some italic text.</p>
+        <p class="expect">Expect: the popover contains some bold text and some italic text.</p>
         <qnc-help-tip data-popover-html="Plain text. <b>Bold text.</b> <i>Italic text</b>">
             <button data-help-tip-toggler type="button">?</button>
         </qnc-help-tip>
@@ -87,7 +87,7 @@
 
     <div class="test">
         Focusable content
-        <p class="expect">Expect: after opening the pop-up, you can focus the button by pressing the tab key. You can activate the button via keyboard or mouse; an alert will show and the pop-up will remain open.</p>
+        <p class="expect">Expect: after opening the popover, you can focus the button by pressing the tab key. You can activate the button via keyboard or mouse; an alert will show and the popover will remain open.</p>
         <qnc-help-tip data-popover-html="<button onclick='alert(`Hello`);'>alert hello</button>">
             <button data-help-tip-toggler type="button">?</button>
         </qnc-help-tip>
@@ -95,27 +95,27 @@
 
     <div class="test">
         <qnc-help-tip
-            data-popover-text="This is a long-ish help text that makes the pop-up as wide as it is allowed to be, so that it would overflow the left edge of the page if it were simply centered over the term."
+            data-popover-text="This is a long-ish help text that makes the popover as wide as it is allowed to be, so that it would overflow the left edge of the page if it were simply centered over the term."
         >
             left edge
             <button data-help-tip-toggler type="button">?</button>
         </qnc-help-tip>
         <h2>Near left edge of page</h2>
         <p class="expect">
-            Expect: pop-up does not overflow the left edge of the page.
+            Expect: popover does not overflow the left edge of the page.
         </p>
     </div>
 
     <div class="test right" style="padding-right: 0">
         <qnc-help-tip
-            data-popover-text="This is a long-ish help text that makes the pop-up as wide as it is allowed to be, so that it would overflow the right edge of the page if it were simply centered over the term."
+            data-popover-text="This is a long-ish help text that makes the popover as wide as it is allowed to be, so that it would overflow the right edge of the page if it were simply centered over the term."
         >
             right edge
             <button data-help-tip-toggler type="button">?</button>
         </qnc-help-tip>
         <h2>Near right edge of page</h2>
         <p class="expect">
-            Expect: pop-up does not overflow the right edge of the page.
+            Expect: popover does not overflow the right edge of the page.
         </p>
     </div>
 
@@ -124,8 +124,8 @@
     <div class="test">
         <h2>Anchored while scrolling</h2>
         <p class="expect">
-            Expect: open the pop-up, then scroll (wheel / trackpad / keyboard).
-            The pop-up stays attached to the term, and flips above/below as
+            Expect: open the popover, then scroll (wheel / trackpad / keyboard).
+            The popover stays attached to the term, and flips above/below as
             the term nears the viewport edges.
         </p>
         <p style="margin-top: 5em">
@@ -143,8 +143,8 @@
     <div class="test">
         <h2>Closing with mouse click</h2>
         <p class="expect">
-            Expect: clicking the toggle button while the pop-up is open
-            should close the pop-up.
+            Expect: clicking the toggle button while the popover is open
+            should close the popover.
         </p>
         <qnc-help-tip
             data-popover-text="Click the toggle button again to close me."
@@ -158,8 +158,8 @@
         <h2>Closing with keyboard</h2>
         <p class="expect">
             Expect: activating the toggle button via the keyboard (focus it
-            with Tab, press Enter or Space) while the pop-up is open should
-            close the pop-up.
+            with Tab, press Enter or Space) while the popover is open should
+            close the popover.
         </p>
         <qnc-help-tip
             data-popover-text="Press Enter or Space on the toggle button again to close me."
