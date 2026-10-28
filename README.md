@@ -48,7 +48,7 @@ HTML help:
 
 ## Styling
 
-- Style popovers with the `.qnc-help-tip-popover` class. [src/qnc-help-tip.css](src/qnc-help-tip.css) is a working starting point, and describes the required styles.
+- Style popovers with the `.qnc-help-tip-popover` class. [src/qnc_help_tip.css](src/qnc_help_tip.css) is a working starting point, and describes the required styles.
 - While open, the `<qnc-help-tip>` element has an `open` attribute, so you can highlight it:
 
   ```css
