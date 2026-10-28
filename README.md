@@ -64,6 +64,35 @@ HTML help:
 
 Modern browsers with support for the Popover API and CSS anchor positioning.
 
+## Known issue: width + scrollbars
+
+Our default styles set width to (pseudo code) `min(400px, 100vw - 2*horizontal_margin)`. This works well on ALMOST any device. 
+
+The only exception is when the user is using a browser with "always-visible" scrollbars (AFAIK, no modern browser is setup this way by default, but desktop browsers let you opt-in to this behaviour). In this setup, 100vw INCLUDES the space occupied by the vertical scroll bar, so the scrollbar might cover up part of the popover. This isn't likely to be a problem, however, since such browser windows are almost going to be wider than 400px.
+
+I don't think there is any simple pure-css solution to this problem. We _could_ add code to check, after the popover is opened, if it is covered by scroll bar (and if so, reduce max-width accordingly).
+
+## Known issue: height + scrollbars
+
+Our default styles set max-height to `calc(100vh - 2 * var(--window-v-margin))`. This works well on ALMOST any device. 
+
+The only exception is when the user is using a browser with "always-visible" scrollbars (AFAIK, no modern browser is setup this way by default, but desktop browsers let you opt-in to this behaviour). In this setup, 100vh INCLUDES the space occupied by the horizontal scroll bar, so the scrollbar might cover up part of the popover. 
+
+So this is only a problem when:
+- your site has a horizontal scroll bar
+- the user is using a browser with "always visible scroll bars"
+- the popover content is taller than available screen space
+
+I don't think there is any simple pure-css solution to this problem. We _could_ add code to check, after the popover is opened, if it is covered by scroll bar (and if so, reduce max-height accordingly).
+
+## Known issue: target-covering
+
+The popover will ONLY scroll vertically if its content is taller than the available viewport space. It will cover up the `qnc-help-tip` element before this happens.
+
+A better algorithm would be to let users define a `--min-height-before-target-gets-covered`. If there is this much space available, then the popover will scroll vertically before it's allowed to cover the target. If there is less than this much space, the popover can take up the entire viewport.
+
+Note that you _could_ just set a more constrained max-height (eg. 50vh), which would sort of do the same thing. That approach, however, does not let the popover take up all of the available space when the target is near the top or bottom edge of the viewport.
+
 ## Development
 
 ```sh

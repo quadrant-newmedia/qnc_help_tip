@@ -140,6 +140,28 @@
         </p>
     </div>
 
+
+    <div class="test">
+        <h2>Vertical scrolling</h2>
+        <p class="expect">
+            Expect: the popover fits within the viewport and scrolls vertically. When the target is vertically centered in the viewport, the popover expands to fill entire viewport height, covering the target (we might change this behaviour in the future).
+        </p>
+        <qnc-help-tip
+            data-popover-html="<div style='height: 4000px; background: repeating-linear-gradient(
+                    to bottom,
+                    #ef4444 0px,
+                    #ef4444 20px,
+                    #b91c1c 20px,
+                    #b91c1c 40px
+                );
+            )'></div>"
+        >
+            vertical scrolling
+            <button data-help-tip-toggler type="button">?</button>
+        </qnc-help-tip>
+    </div>
+
+
     <div class="test">
         <h2>Closing with mouse click</h2>
         <p class="expect">
