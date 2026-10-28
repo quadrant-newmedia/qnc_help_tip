@@ -192,3 +192,24 @@ export class QncHelpTip extends HTMLElement {
 }
 
 customElements.define("qnc-help-tip", QncHelpTip);
+
+// Help users catch errors early. Make sure they've included our stylesheet (or an equivalent)
+function check_styles() {
+    const style_version = getComputedStyle(
+        document.documentElement,
+    ).getPropertyValue("--qnc-help-tip-version");
+
+    if (style_version != "1") {
+        // Throw an error rather than just console.error; if the site has an error event listener (eg. for logging) we want to trigger it
+        throw new Error(
+            "Styles weren't set up correctly for qnc-help-tip. You must either load our stylesheet or equivalent styles, and you must set `:root {--qnc-help-tip-style-version: 1;}` to explicitly declare your compliance with our requirements.",
+        );
+    }
+}
+
+if (document.readyState == "complete") {
+    // Run asynchronously, so if we throw an error it doesn't stop script loading
+    setTimeout(check_styles);
+} else {
+    addEventListener("load", check_styles);
+}
