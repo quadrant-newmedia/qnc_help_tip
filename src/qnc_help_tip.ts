@@ -85,6 +85,9 @@ export class QncHelpTip extends HTMLElement {
     // It helps us identify when multiple simultaneous things trigger the closing of the popover
     #asyncUpdatedIsOpen = false;
 
+    // Set during click events, cleared in toggle events.
+    #clickedToggler: HTMLElement | null = null;
+
     constructor() {
         super();
         // Delegated, so toggle buttons can be anywhere within us, even if added later.
@@ -93,7 +96,7 @@ export class QncHelpTip extends HTMLElement {
             if (!(target instanceof Element)) return;
             const toggler = target.closest("[data-help-tip-toggler]");
             if (!toggler || toggler.closest("qnc-help-tip") !== this) return;
-            this.#onTogglerClick();
+            this.#onTogglerClick(toggler);
         });
     }
 
@@ -128,7 +131,11 @@ export class QncHelpTip extends HTMLElement {
         this.toggleAttribute("open", value);
     }
 
-    #onTogglerClick() {
+    #onTogglerClick(toggler: Element) {
+        const should_open = !this.#asyncUpdatedIsOpen;
+        if (should_open && toggler instanceof HTMLElement) {
+            this.#clickedToggler = toggler;
+        }
         this.toggleAttribute("open", !this.#asyncUpdatedIsOpen);
     }
 
@@ -168,6 +175,7 @@ export class QncHelpTip extends HTMLElement {
         }
 
         popover.addEventListener("toggle", (event: ToggleEvent) => {
+            this.#clickedToggler = null;
             const isOpen = event.newState == "open";
             if (!isOpen) {
                 // this might have been triggered by light-dismissal, might have been triggered by one of our own .hidePopover() calls
@@ -187,7 +195,14 @@ export class QncHelpTip extends HTMLElement {
 
         document.body.append(popover);
         this.#popover = popover;
-        popover.showPopover();
+        const options: ShowPopoverOptions = {};
+        const source =
+            this.#clickedToggler ||
+            this.querySelector("[data-help-tip-toggler]");
+        if (source instanceof HTMLElement) {
+            options.source = source;
+        }
+        popover.showPopover(options);
     }
 }
 

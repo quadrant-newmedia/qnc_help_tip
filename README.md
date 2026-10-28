@@ -4,10 +4,13 @@
 
 ## Usage
 
-Import the module (it registers the element) and, optionally, the default stylesheet:
+Import the module (it registers the element) and the default stylesheet:
 
 ```html
 <script type="module" src="/dist/qnc_help_tip.js"></script>
+<!-- We actually recommend you use something like esbuild and @import our stylesheet into your base stylesheet -->
+<!-- Note: you _may_ omit this, as long as you review it and add equivalent/conforming styles to your stylesheet -->
+<link rel="stylesheet" href="node_modules/@qnc/qnc_help_tip/qnc_help_tip.css">
 ```
 
 Plain-text help:
@@ -40,12 +43,12 @@ HTML help:
   </div>
   ```
 
-- It is a `popover="auto"` popover, so it closes on outside click or Escape. It is not modal and does not block scrolling.
+- It is a `popover="auto"` popover, so it closes on external click or pressing Escape. It is not modal and does not block scrolling.
 - It is anchored with CSS anchor positioning: centered above the help tip, flipping below when there is not enough room, and staying attached while scrolling.
 
 ## Styling
 
-- Style popovers with the `.qnc-help-tip-popover` class. [src/qnc-help-tip.css](src/qnc-help-tip.css) is a starting point (border, shadow, 400px max width, viewport margins).
+- Style popovers with the `.qnc-help-tip-popover` class. [src/qnc-help-tip.css](src/qnc-help-tip.css) is a working starting point, and describes the required styles.
 - While open, the `<qnc-help-tip>` element has an `open` attribute, so you can highlight it:
 
   ```css
@@ -54,7 +57,7 @@ HTML help:
 
 ## Programmatic control
 
-- The `open` attribute and `open` property work like those of `<details>`. Setting the attribute in HTML opens the tip on load, which may cause a flash of unstyled content.
+- The `open` attribute and `open` property work like those of `<details>`. Setting the attribute in HTML opens the popover on load, which may cause a flash of unstyled content.
 - A `toggle` event (bubbling, not cancelable) is dispatched after the open state changes. There is no `beforetoggle`.
 
 ## Browser support

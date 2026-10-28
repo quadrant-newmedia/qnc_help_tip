@@ -65,7 +65,7 @@
         </p>
     </div>
 
-    <div class="test" style="padding-top: 0">
+    <div class="test">
         Wide min-content
         <p class="expect">
             Expect: open the pop-up. It should not exceed the width of the window. Content should scroll within the inner scroller.
@@ -78,6 +78,28 @@
     </div>
 
     <div class="test">
+        HTML content
+        <p class="expect">Expect: the pop-up contains some bold text and some italic text.</p>
+        <qnc-help-tip data-popover-html="Plain text. <b>Bold text.</b> <i>Italic text</b>">
+            <button data-help-tip-toggler type="button">?</button>
+        </qnc-help-tip>
+    </div>
+
+    <div class="test">
+        Focusable content
+        <p class="expect">Expect: after opening the pop-up, you can focus the button by pressing the tab key. You can activate the button via keyboard or mouse; an alert will show and the pop-up will remain open.</p>
+        <qnc-help-tip data-popover-html="<button onclick='alert(`Hello`);'>alert hello</button>">
+            <button data-help-tip-toggler type="button">?</button>
+        </qnc-help-tip>
+    </div>
+
+    <div class="test">
+        <qnc-help-tip
+            data-popover-text="This is a long-ish help text that makes the pop-up as wide as it is allowed to be, so that it would overflow the left edge of the page if it were simply centered over the term."
+        >
+            left edge
+            <button data-help-tip-toggler type="button">?</button>
+        </qnc-help-tip>
         <h2>Near left edge of page</h2>
         <p class="expect">
             Expect: pop-up does not overflow the left edge of the page.
@@ -104,8 +126,7 @@
         <p class="expect">
             Expect: open the pop-up, then scroll (wheel / trackpad / keyboard).
             The pop-up stays attached to the term, and flips above/below as
-            the term nears the viewport edges. Click the term's button
-            again, click elsewhere, or press Escape to close.
+            the term nears the viewport edges.
         </p>
         <p style="margin-top: 5em">
             Scroll down a bit, then open
