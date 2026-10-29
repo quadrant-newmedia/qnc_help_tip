@@ -155,8 +155,16 @@ export class QncHelpTip extends HTMLElement {
             "style",
             `
             overflow: auto; min-width: 0; min-height: 0;
+            flex-grow: 1;
         `,
         );
+
+        /*
+            Layout:
+            popover
+                scroller
+                connector
+        */
 
         popover.classList.add("qnc-help-tip-popover");
         popover.setAttribute("popover", "auto");
