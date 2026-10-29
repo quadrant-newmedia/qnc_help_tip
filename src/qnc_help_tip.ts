@@ -1,5 +1,5 @@
 /**
-    cspell: words FOUC
+    cspell: words FOUC qncht unitless
 
     <qnc-help-tip> is for adding popovers with help text.
 
@@ -75,6 +75,56 @@
     - dynamically generates a unique anchor name when the popover is opened
     - sets key positioning styles directly on the popover, but otherwise leaves it unstyled
  */
+
+const style_sheet = new CSSStyleSheet();
+
+// Note: 0-specificity selector lets users override this trivially in their stylesheet by defining them on qnc-help-tip
+// This is approach is "non-dom-mutating", and has zero external stylesheet dependencies
+// Only works because <qnc-help-tip> on its own has no visual effect (until opened)
+// Ie, these styles will never cause FOUC
+// TODO: document these in README, how the user is allowed to change
+style_sheet.replaceSync(`
+    :where(qnc-help-tip) {
+        --qncht-h-margin: 12px;
+        --qncht-v-margin: 12px;
+        --qncht-padding: 5px 10px;
+        --qncht-min-width: 400px;
+        --qncht-max-width: 400px;
+        --qncht-border: 1px solid black;
+        --qncht-border-radius: 5px;
+        --qncht-background: white;
+        --qncht-color: black;
+        --qncht-connector-width: 9;
+        --qncht-connector-height: 12;
+    }
+`);
+document.adoptedStyleSheets.push(style_sheet);
+
+function parse_styles(qnc_help_tip: HTMLElement) {
+    const style = getComputedStyle(qnc_help_tip);
+
+    function require_number(name: string): number {
+        const val = Number(style.getPropertyValue(name));
+        if (isNaN(val)) throw new Error(`${name} must be a unitless number`);
+        return val;
+    }
+
+    return {
+        h_margin: style.getPropertyValue("--qncht-h-margin"),
+        v_margin: style.getPropertyValue("--qncht-v-margin"),
+        padding: style.getPropertyValue("--qncht-padding"),
+        min_width: style.getPropertyValue("--qncht-min-width"),
+        max_width: style.getPropertyValue("--qncht-max-width"),
+        border: style.getPropertyValue("--qncht-border"),
+        border_radius: style.getPropertyValue("--qncht-border-radius"),
+        background: style.getPropertyValue("--qncht-background"),
+        color: style.getPropertyValue("--qncht-color"),
+        connector_width: require_number("--qncht-connector-width"),
+        connector_height: require_number("--qncht-connector-height"),
+    };
+}
+type Styles = ReturnType<typeof parse_styles>;
+
 export class QncHelpTip extends HTMLElement {
     static observedAttributes = ["open"];
 
@@ -148,16 +198,7 @@ export class QncHelpTip extends HTMLElement {
 
         const anchorName = `--qnc-help-tip-${QncHelpTip.#nextId++}`;
         this.style.setProperty("anchor-name", anchorName);
-
-        const popover = document.createElement("div");
-        const scroller = document.createElement("div");
-        scroller.setAttribute(
-            "style",
-            `
-            overflow: auto; min-width: 0; min-height: 0;
-            flex-grow: 1;
-        `,
-        );
+        const styles = parse_styles(this);
 
         /*
             Layout:
@@ -166,14 +207,39 @@ export class QncHelpTip extends HTMLElement {
                 connector
         */
 
-        popover.classList.add("qnc-help-tip-popover");
+        const popover = document.createElement("div");
         popover.setAttribute("popover", "auto");
-        popover.style.setProperty("position-anchor", anchorName);
-        popover.style.setProperty("position-area", "top");
-        popover.style.setProperty("justify-self", "anchor-center");
-        popover.style.setProperty("position-try-fallbacks", "flip-block");
-        popover.style.setProperty("inset", "auto");
+        popover.setAttribute(
+            "style",
+            `
+                position-anchor: ${anchorName};
+                position-area: top;
+                justify-self: anchor-center;
+                position-try-fallbacks: flip-block;
+                inset: auto;
+                box-sizing: border-box;
+                overflow: visible;
+                display: flex;
+                flex-direction: column;
+                width: min(${styles.min_width}, calc(100vw - 2 * ${styles.h_margin}));
+                max-width: min(${styles.max_width}, calc(100vw - 2 * ${styles.h_margin}));
+                max-height: calc(100vh - ${styles.v_margin} - ${styles.connector_height}px);
+                margin: ${styles.v_margin} ${styles.h_margin};
+                margin-bottom: ${styles.connector_height}px;
+                padding: ${styles.padding};
+                border: ${styles.border};
+                border-radius: ${styles.border_radius}
+            `,
+        );
 
+        const scroller = document.createElement("div");
+        scroller.setAttribute(
+            "style",
+            `
+                overflow: auto; min-width: 0; min-height: 0;
+                flex-grow: 1;
+            `,
+        );
         popover.appendChild(scroller);
         const html = this.getAttribute("data-popover-html");
         if (html !== null) {
@@ -212,41 +278,51 @@ export class QncHelpTip extends HTMLElement {
         }
         popover.showPopover(options);
 
-        append_connector(this, popover);
+        append_connector(this, popover, styles);
     }
 }
 
 /**
     Must be called after the help_tip is already connected to the DOM (since we use getComputedStyle) AND the popover is rendered (since we use getBoundingClientRect)
  */
-function append_connector(help_tip: HTMLElement, popover: HTMLElement) {
+function append_connector(
+    help_tip: HTMLElement,
+    popover: HTMLElement,
+    styles: Styles,
+) {
     const connector = document.createElementNS(
         "http://www.w3.org/2000/svg",
         "svg",
     );
 
     const popover_style = getComputedStyle(popover);
-    function get_style_number(name: string): number {
-        const val = Number(popover_style.getPropertyValue(name));
-        if (isNaN(val)) throw new Error(`${name} must be a unitless number`);
-        return val;
-    }
-    const connector_width = get_style_number("--connector-width");
-    const connector_height = get_style_number("--connector-height");
-    const border_width = get_style_number("--border-width");
+    // function get_style_number(name: string): number {
+    //     const val = Number(popover_style.getPropertyValue(name));
+    //     if (isNaN(val)) throw new Error(`${name} must be a unitless number`);
+    //     return val;
+    // }
+    const { connector_width, connector_height, background } = styles;
+    const border_width = parseFloat(popover_style.borderBottomWidth);
     const inner_connector_lift = border_width / connector_width; // This works out exactly. We're not approximating.
     const border_radius = parseInt(popover_style.borderRadius);
+    const border_color = popover_style.borderBottomColor;
+    const background_color = popover_style.backgroundColor;
 
     connector.setAttribute("viewBox", `0 0 2 1`);
     connector.setAttribute("preserveAspectRatio", "none");
-    connector.style.width = connector_width + "px";
-    connector.style.height = connector_height + "px";
-    connector.style.overflow = "hidden";
-    connector.style.position = "absolute";
+    connector.setAttribute(
+        "style",
+        `
+            width: ${connector_width}px;    
+            height: ${connector_height}px;    
+            position: absolute;
+            overflow: hidden;
+        `,
+    );
     connector.innerHTML = `
-        <path d="M 0,0 L 1,1 L 2,0 Z" fill="var(--border-color)" />
-        <path d="M 0,0 L 1,1 L 2,0 Z" fill="var(--background-color)" style="transform: translateY(-${inner_connector_lift}px);"/>
-    `; // TODO: calculate translation
+        <path d="M 0,0 L 1,1 L 2,0 Z" fill="${border_color}" />
+        <path d="M 0,0 L 1,1 L 2,0 Z" fill="${background_color}" style="transform: translateY(-${inner_connector_lift}px);"/>
+    `;
 
     popover.appendChild(connector);
 
@@ -303,24 +379,3 @@ function append_connector(help_tip: HTMLElement, popover: HTMLElement) {
 }
 
 customElements.define("qnc-help-tip", QncHelpTip);
-
-// Help users catch errors early. Make sure they've included our stylesheet (or an equivalent)
-function checkStyles() {
-    const styleVersion = getComputedStyle(
-        document.documentElement,
-    ).getPropertyValue("--qnc-help-tip-style-version");
-
-    if (styleVersion != "1") {
-        // Throw an error rather than just console.error; if the site has an error event listener (eg. for logging) we want to trigger it
-        throw new Error(
-            "Styles weren't set up correctly for qnc-help-tip. You must either load our stylesheet or equivalent styles, and you must set `:root {--qnc-help-tip-style-version: 1;}` to explicitly declare your compliance with our requirements.",
-        );
-    }
-}
-
-if (document.readyState == "complete") {
-    // Run asynchronously, so if we throw an error it doesn't stop script loading
-    setTimeout(checkStyles);
-} else {
-    addEventListener("load", checkStyles);
-}

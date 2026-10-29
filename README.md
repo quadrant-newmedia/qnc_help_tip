@@ -48,6 +48,14 @@ HTML help:
 
 ## Styling
 
+- --h-margin (12)
+- --v-margin (12)
+- --connector-width (9)
+- --connector-height (12)
+- --min-width (400px)
+- --max-width (400px)
+
+
 - Style popovers with the `.qnc-help-tip-popover` class. [src/qnc_help_tip.css](src/qnc_help_tip.css) is a working starting point, and describes the required styles.
 - While open, the `<qnc-help-tip>` element has an `open` attribute, so you can highlight it:
 
@@ -74,7 +82,7 @@ I don't think there is any simple pure-css solution to this problem. We _could_ 
 
 ## Known issue: height + scrollbars
 
-Our default styles set max-height to `calc(100vh - 2 * var(--window-v-margin))`. This works well on ALMOST any device. 
+Our default styles set max-height to `calc(100vh - 2 * var(--v-margin))`. This works well on ALMOST any device. 
 
 The only exception is when the user is using a browser with "always-visible" scrollbars (AFAIK, no modern browser is setup this way by default, but desktop browsers let you opt-in to this behaviour). In this setup, 100vh INCLUDES the space occupied by the horizontal scroll bar, so the scrollbar might cover up part of the popover. 
 
