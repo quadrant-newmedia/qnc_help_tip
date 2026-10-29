@@ -203,7 +203,95 @@ export class QncHelpTip extends HTMLElement {
             options.source = source;
         }
         popover.showPopover(options);
+
+        append_connector(this, popover);
     }
+}
+
+/**
+    Must be called after the help_tip is already connected to the DOM (since we use getComputedStyle) AND the popover is rendered (since we use getBoundingClientRect)
+ */
+function append_connector(help_tip: HTMLElement, popover: HTMLElement) {
+    const connector = document.createElementNS(
+        "http://www.w3.org/2000/svg",
+        "svg",
+    );
+
+    const popover_style = getComputedStyle(popover);
+    function get_style_number(name: string): number {
+        const val = Number(popover_style.getPropertyValue(name));
+        if (isNaN(val)) throw new Error(`${name} must be a unitless number`);
+        return val;
+    }
+    const connector_width = get_style_number("--connector-width");
+    const connector_height = get_style_number("--connector-height");
+    const border_width = get_style_number("--border-width");
+    const inner_connector_lift = border_width / connector_width; // This works out exactly. We're not approximating.
+    const border_radius = parseInt(popover_style.borderRadius);
+
+    connector.setAttribute("viewBox", `0 0 2 1`);
+    connector.setAttribute("preserveAspectRatio", "none");
+    connector.style.width = connector_width + "px";
+    connector.style.height = connector_height + "px";
+    connector.style.overflow = "hidden";
+    connector.style.position = "absolute";
+    connector.innerHTML = `
+        <path d="M 0,0 L 1,1 L 2,0 Z" fill="var(--border-color)" />
+        <path d="M 0,0 L 1,1 L 2,0 Z" fill="var(--background-color)" style="transform: translateY(-${inner_connector_lift}px);"/>
+    `; // TODO: calculate translation
+
+    popover.appendChild(connector);
+
+    const position_connector = () => {
+        const target_rect = help_tip.getBoundingClientRect();
+        const popover_rect = popover.getBoundingClientRect();
+
+        const min_horizontal_inset =
+            connector_width / 2 + border_width + border_radius;
+
+        // relative to viewport
+        const x_overlap_min = Math.max(target_rect.x, popover_rect.x);
+        const x_overlap_max = Math.min(
+            target_rect.x + target_rect.width,
+            popover_rect.x + popover_rect.width,
+        );
+        const x_overlap_center = (x_overlap_min + x_overlap_max) / 2;
+
+        // relative to popover_rect's left edge
+        const overlap_center_left_coordinate =
+            x_overlap_center - popover_rect.x;
+        const left_clamped = Math.max(
+            overlap_center_left_coordinate,
+            min_horizontal_inset,
+        );
+        const fully_clamped = Math.min(
+            left_clamped,
+            popover_rect.width - min_horizontal_inset,
+        );
+
+        connector.style.left = fully_clamped + "px";
+
+        if (popover_rect.top < target_rect.top) {
+            // popover is above target
+            connector.style.top = "100%";
+            connector.style.bottom = "";
+            connector.style.transform = "translateX(-50%)";
+        } else {
+            // popover is below target
+            connector.style.top = "";
+            connector.style.bottom = "100%";
+            connector.style.transform = "rotateZ(180deg) translateX(-50%)";
+        }
+    };
+    const onscroll = () => {
+        if (!popover.isConnected) {
+            window.removeEventListener("scroll", onscroll);
+            connector.remove();
+        } else position_connector();
+    };
+    window.addEventListener("scroll", onscroll);
+
+    position_connector();
 }
 
 customElements.define("qnc-help-tip", QncHelpTip);

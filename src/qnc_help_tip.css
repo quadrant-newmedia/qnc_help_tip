@@ -12,11 +12,19 @@
     --window-h-margin: 1em;
     --window-v-margin: 1em;
     border: 1px solid gray;
-    border-radius: 0.5em    ;
-    box-shadow: 3px 3px 6px 0 gray;
+    border-radius: 0.5em;
+    filter: drop-shadow( gray 0px 0px 3px);
     background: white;
     padding: 0.5em 1em;
+    
     box-sizing: border-box;
+    overflow: visible;
+
+    --background-color: white;
+    --border-color: black;
+    --border-width: 1;
+    --connector-width: 9;
+    --connector-height: 12;
 
     /* You can change to `width: auto;` and use this value for max-width, if you prefer to let the popover become narrow when its content is narrow */
     /* Note: this does NOT work perfectly on browsers with "space-taking" scroll bars; the scroll bar can cover up the margin and popover. This isn't usually a problem, though, since mobile browsers tend to have auto-hiding scrollbars and desktop browsers tend to be wider than 400px. */
@@ -29,7 +37,7 @@
     margin: var(--window-v-margin) var(--window-h-margin);
 
     /* this is the gap between the popover and the anchor (even when the popover flips to the bottom) */
-    margin-bottom: 5px;
+    margin-bottom: calc( var(--connector-height) * 1px);
 }
 
 /* Our script checks this just to make sure our styles are installed. If you install your own styles instead of ours, be sure to set this custom property. */
