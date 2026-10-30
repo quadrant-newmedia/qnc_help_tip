@@ -112,12 +112,29 @@ function parse_styles(qnc_help_tip: HTMLElement) {
         return val;
     }
 
+    function normalize_length(name: string): string {
+        const val = style.getPropertyValue(name);
+        /**
+            0 is a valid CSS length IN MOST CONTEXTS, so we support it.
+            Unfortunately, it doesn't work when used inside calc(), which we do with some of our properties. For those, we make sure to normalize 0 -> 0px
+        */
+        if (val.trim() == "0") return "0px";
+        /*
+            If the user provides a unitless length and we don't do this, things break in hard-to-debug ways
+        */
+        if (!isNaN(Number(val)))
+            throw new Error(
+                `${name} must be a valid css length; it cannot be a unitless number`,
+            );
+        return val;
+    }
+
     return {
-        h_margin: style.getPropertyValue("--qncht-h-margin"),
-        v_margin: style.getPropertyValue("--qncht-v-margin"),
+        h_margin: normalize_length("--qncht-h-margin"),
+        v_margin: normalize_length("--qncht-v-margin"),
         padding: style.getPropertyValue("--qncht-padding"),
-        min_width: style.getPropertyValue("--qncht-min-width"),
-        max_width: style.getPropertyValue("--qncht-max-width"),
+        min_width: normalize_length("--qncht-min-width"),
+        max_width: normalize_length("--qncht-max-width"),
         border: style.getPropertyValue("--qncht-border"),
         border_radius: style.getPropertyValue("--qncht-border-radius"),
         background: style.getPropertyValue("--qncht-background"),
@@ -311,11 +328,6 @@ function append_connector(
     );
 
     const popover_style = getComputedStyle(popover);
-    // function get_style_number(name: string): number {
-    //     const val = Number(popover_style.getPropertyValue(name));
-    //     if (isNaN(val)) throw new Error(`${name} must be a unitless number`);
-    //     return val;
-    // }
     const { connector_width, connector_height, background } = styles;
     const border_width = parseFloat(popover_style.borderBottomWidth);
     const border_radius = parseInt(popover_style.borderRadius);
