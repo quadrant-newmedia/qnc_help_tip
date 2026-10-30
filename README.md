@@ -1,4 +1,5 @@
 # qnc_help_tip
+<!-- cspell: words qncht unitless -->
 
 `<qnc-help-tip>` is a dependency-free custom element for adding help popovers to inline text. It uses the native HTML Popover API and CSS anchor positioning.
 
@@ -46,24 +47,64 @@ HTML help:
 - It is a `popover="auto"` popover, so it closes on external click or pressing Escape. It is not modal and does not block scrolling.
 - It is anchored with CSS anchor positioning: centered above the help tip, flipping below when there is not enough room, and staying attached while scrolling.
 
-## Styling (.qnc-help-tip-popover)
+## Styling
 
-- --h-margin (12)
-- --v-margin (12)
-- --connector-width (9)
-- --connector-height (12)
-- --min-width (400px)
-- --max-width (400px)
+### The target element
 
-- background-
+By "target element", we're referring to the actual `<qnc-help-tip>` element, which appears inline on your page.
+
+We recommend adding this, to prevent your targets from splitting across multiple lines:
+```css
+qnc-help-tip {
+    display: inline-block;
+}
+```
+
+We'd like to apply this style automatically, but if we did so it would cause flash-of-unstyled-content. Since we inject styles at runtime, the only styles we inject are those which only impact the target/popover when the popover is open.
+
+While open, this element has an `open` attribute, so you can highlight or underline it. We have a default style of:
+
+```css
+qnc-help-tip[open] {
+    text-decoration: underline dotted;
+}
+```
+
+Feel free to override. Note: the actual rule we apply uses `:where(qnc-help-tip[open])`, which has 0 specificity so that you can override it.
 
 
-- Style popovers with the `.qnc-help-tip-popover` class. [src/qnc_help_tip.css](src/qnc_help_tip.css) is a working starting point, and describes the required styles.
-- While open, the `<qnc-help-tip>` element has an `open` attribute, so you can highlight it:
+### The popover
 
-  ```css
-  qnc-help-tip[open] { background: #ffe9a8; }
-  ```
+The following custom properties can all be set on `.qnc-help-tip`, but impact the popover:
+
+| property | default | description | 
+| - | - | - |
+| --qncht-h-margin |  12px | any css length; minimum horizontal padding between popover and window | 
+| --qncht-v-margin |  12px | any css length; minimum vertical padding between popover and window | 
+| --qncht-padding |  5px 10px |  anything accepted by `padding`; the padding inside the popover  | 
+| --qncht-min-width |  400px | any css length; see "Sizing" section | 
+| --qncht-max-width |  400px | any css length; see "Sizing" section |
+| --qncht-border |  1px solid black | anything accepted by `border`; we recommend a solid border, because it the connector triangle is generated via SVG and always uses a solid border (matching the color and width of the main border) | 
+| --qncht-border-radius |  5px | anything accepted by `border-radius` | 
+| --qncht-background |  white | anything accepted by `background`; we recommend a solid background, because it will be "copied" into the connector triangle | 
+| --qncht-connector-width |  9 | unitless int or float; sets width of the triangle connector (in pixels) | 
+| <span style="white-space: nowrap;">--qncht-connector-height</span> |  12 | unitless int or float; sets height of the triangle connector (in pixels) | 
+| --qncht-filter |  drop-shadow(gray 0 0 3px) | anything accepted by `filter`; applies to the popover | 
+
+## Popover sizing
+
+The popover's size can be affected by:
+- its content
+- --qncht-min-width (defaults to 400px)
+- --qncht-max-width  (defaults to 400px)
+- the viewport width (and --qncht-h-margin)
+- the viewport height (and the target height, --qncht-v-margin, and --qncht-connector-heigh)
+
+Horizontally, it starts out at --qncht-min-width and grows as needed to fit its content up to a maximum of --qncht-max-width. Then, if it doesn't fit within the viewport (along with --qncht-h-margin on each side), it will be made narrower to fit. It's content will scroll horizontally if necessary.
+
+The default values of --qncht-min-width and --qncht-max-width are the same. This means that whenever the viewport is big enough, all popovers have a fixed width. We believe this provides the best UX. Feel free to make the min width less than the max width, if you'd prefer the popovers to have a content-depended width.
+
+Vertically, the popover takes up as much space as needed. We ensure it stays short enough that if the target is centered in the viewport, the popover (along with the triangle connector and --qncht-v-margin) can fit entirely above (or below) the target. This ensures the popover can "flip sides" seamlessly as the target is scrolled in the viewport, and the popover will never obscure the target.
 
 ## Programmatic control
 

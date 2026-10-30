@@ -32,10 +32,6 @@
                 #e4e4e4 100px
             );
         }
-        qnc-help-tip[open] {
-            background: #ffe9a8;
-            border-bottom: 1px dotted black;
-        }
         qnc-help-tip button {
             border-radius: 50%;
             width: 1.5em;
@@ -112,6 +108,26 @@
             right edge
             <button data-help-tip-toggler type="button">?</button>
         </qnc-help-tip>
+        <h2>Near right edge of page</h2>
+        <p class="expect">
+            Expect: popover does not overflow the right edge of the page.
+        </p>
+    </div>
+    <div class="test">
+        Line-split target
+        <p class="expect">The target wraps across multiple lines. The popover behaves reasonably.</p>
+
+        <div style="position: relative;">
+            <span style="display: inline-block; width: calc( 100% - 80px );"></span>
+            <qnc-help-tip
+                data-popover-text="Testing."
+            >
+                Multiple word target
+                <button data-help-tip-toggler type="button">?</button>
+            </qnc-help-tip>
+
+        </div>
+
         <h2>Near right edge of page</h2>
         <p class="expect">
             Expect: popover does not overflow the right edge of the page.

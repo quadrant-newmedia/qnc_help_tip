@@ -93,10 +93,12 @@ style_sheet.replaceSync(`
         --qncht-border: 1px solid black;
         --qncht-border-radius: 5px;
         --qncht-background: white;
-        --qncht-color: black;
         --qncht-connector-width: 9;
         --qncht-connector-height: 12;
         --qncht-filter: drop-shadow(gray 0 0 3px);
+    }
+    :where(qnc-help-tip[open]) {
+        text-decoration: underline dotted;
     }
 `);
 document.adoptedStyleSheets.push(style_sheet);
@@ -119,7 +121,6 @@ function parse_styles(qnc_help_tip: HTMLElement) {
         border: style.getPropertyValue("--qncht-border"),
         border_radius: style.getPropertyValue("--qncht-border-radius"),
         background: style.getPropertyValue("--qncht-background"),
-        color: style.getPropertyValue("--qncht-color"),
         connector_width: require_number("--qncht-connector-width"),
         connector_height: require_number("--qncht-connector-height"),
         filter: style.getPropertyValue("--qncht-filter"),
@@ -242,6 +243,7 @@ export class QncHelpTip extends HTMLElement {
                 border: ${styles.border};
                 border-radius: ${styles.border_radius};
                 filter: ${styles.filter};
+                background: ${styles.background};
             `,
         );
 
