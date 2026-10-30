@@ -1,0 +1,31 @@
+#!/bin/sh
+# Intended to run AFTER you MANUALLY update version in package.json and commit all changes.
+
+version=$(node -e "console.log(require('./package.json').version);")
+tag="v${version}"
+
+# Ensure tag doesn't already exist
+if [[ $(git tag -l $tag) ]]; then
+    echo "Tag already exists"
+    exit 1
+fi
+
+# Ensure repo is clean
+if [[ ! -z $(git status --porcelain) ]]; then
+    echo "Repository is not clean"
+    exit 1
+fi
+
+# clean and rebuild the dist folder
+rm -r dist/
+rm tsconfig.tsbuildinfo
+./node_modules/.bin/tsc
+
+# --access=public is required because this is an organization-scoped package (so access defaults to private) but we don't have a paid account (so can't publish private packages)
+npm publish --access=public || exit 1;
+
+git tag -a -m "" $tag || exit 1;
+# have not set up a central/public repo for this project yet
+# git push origin || exit 1;
+
+echo "released $tag"
