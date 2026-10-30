@@ -96,6 +96,7 @@ style_sheet.replaceSync(`
         --qncht-color: black;
         --qncht-connector-width: 9;
         --qncht-connector-height: 12;
+        --qncht-filter: drop-shadow(gray 0 0 3px);
     }
 `);
 document.adoptedStyleSheets.push(style_sheet);
@@ -121,6 +122,7 @@ function parse_styles(qnc_help_tip: HTMLElement) {
         color: style.getPropertyValue("--qncht-color"),
         connector_width: require_number("--qncht-connector-width"),
         connector_height: require_number("--qncht-connector-height"),
+        filter: style.getPropertyValue("--qncht-filter"),
     };
 }
 type Styles = ReturnType<typeof parse_styles>;
@@ -207,8 +209,18 @@ export class QncHelpTip extends HTMLElement {
                 connector
         */
 
+        const target_rect = this.getBoundingClientRect();
         const popover = document.createElement("div");
         popover.setAttribute("popover", "auto");
+
+        /* 
+            We want the popover to be short enough so that if the target is centered on screen, the popover can fit either above or below it
+            This ensures that "anchor positioning" flips seamlessly when the page is scrolled
+        */
+        const max_available_height = `calc(${document.documentElement.clientHeight / 2}px - ${styles.v_margin} - ${target_rect.height}px - 2px)`;
+
+        const max_available_width = `calc( ${document.documentElement.clientWidth}px - 2 * ${styles.h_margin})`;
+
         popover.setAttribute(
             "style",
             `
@@ -221,14 +233,15 @@ export class QncHelpTip extends HTMLElement {
                 overflow: visible;
                 display: flex;
                 flex-direction: column;
-                width: min(${styles.min_width}, calc(100vw - 2 * ${styles.h_margin}));
-                max-width: min(${styles.max_width}, calc(100vw - 2 * ${styles.h_margin}));
-                max-height: calc(100vh - ${styles.v_margin} - ${styles.connector_height}px);
+                width: min(${styles.min_width}, ${max_available_width});
+                max-width: min(${styles.max_width}, ${max_available_width});
+                max-height: ${max_available_height};
                 margin: ${styles.v_margin} ${styles.h_margin};
                 margin-bottom: ${styles.connector_height}px;
                 padding: ${styles.padding};
                 border: ${styles.border};
-                border-radius: ${styles.border_radius}
+                border-radius: ${styles.border_radius};
+                filter: ${styles.filter};
             `,
         );
 
