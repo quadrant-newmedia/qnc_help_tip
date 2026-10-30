@@ -206,6 +206,33 @@
         </qnc-help-tip>
     </div>
 
+
+    <div class="test">
+        <h2>Custom Styles</h2>
+        <p class="expect">
+            All of the custom properties have been overridden.
+        </p>
+        <qnc-help-tip
+            data-popover-text="Hello."
+            style="
+                --qncht-h-margin: 0;
+                --qncht-v-margin: 0;
+                --qncht-padding: 0 20px;
+                --qncht-min-width: 200px;
+                --qncht-max-width: 200px;
+                --qncht-border: 6px solid red;
+                --qncht-border-radius: 10px;
+                --qncht-background: yellow;
+                --qncht-connector-width: 20;
+                --qncht-connector-height: 20;
+                --qncht-filter: none;
+            "
+        >
+            keyboard to close
+            <button data-help-tip-toggler type="button">?</button>
+        </qnc-help-tip>
+    </div>
+
     <div class="spacer"></div>
 
 
