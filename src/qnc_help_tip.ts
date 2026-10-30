@@ -318,10 +318,15 @@ function append_connector(
     // }
     const { connector_width, connector_height, background } = styles;
     const border_width = parseFloat(popover_style.borderBottomWidth);
-    const inner_connector_lift = border_width / connector_width; // This works out exactly. We're not approximating.
     const border_radius = parseInt(popover_style.borderRadius);
     const border_color = popover_style.borderBottomColor;
     const background_color = popover_style.backgroundColor;
+
+    // Some basic geometry gives...
+    const Y = connector_width / 2;
+    const H = connector_height;
+    const inner_connector_lift =
+        (border_width * (Y * Y + H * H) ** 0.5) / Y / H;
 
     connector.setAttribute("viewBox", `0 0 2 1`);
     connector.setAttribute("preserveAspectRatio", "none");
