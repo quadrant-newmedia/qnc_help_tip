@@ -88,7 +88,7 @@ style_sheet.replaceSync(`
         --qncht-h-margin: 12px;
         --qncht-v-margin: 12px;
         --qncht-padding: 5px 10px;
-        --qncht-min-width: 400px;
+        --qncht-min-width: 0px;
         --qncht-max-width: 400px;
         --qncht-border: 1px solid black;
         --qncht-border-radius: 5px;
@@ -255,7 +255,8 @@ export class QncHelpTip extends HTMLElement {
                 overflow: visible;
                 display: flex;
                 flex-direction: column;
-                width: min(${styles.min_width}, ${max_available_width});
+                min-width: min(${styles.min_width}, ${max_available_width});
+                width: auto;
                 max-width: min(${styles.max_width}, ${max_available_width});
                 max-height: ${max_available_height};
                 margin: ${styles.v_margin} ${styles.h_margin};
