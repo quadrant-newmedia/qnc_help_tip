@@ -207,13 +207,27 @@
     </div>
 
 
+
+    <div class="test">
+        <h2>White-space preserving</h2>
+        <p class="expect">
+            A lot space between A and B, C on a newline, the third line soft-wraps where appropriate.
+        </p>
+        <qnc-help-tip data-popover-text="A        B
+C
+D: this line should wrap afaf af faff faf af afafa af affa fafa f fafaf af af affaf afaffa af ">
+            foo
+            <button data-help-tip-toggler type="button">?</button>
+        </qnc-help-tip>
+    </div>
+
     <div class="test">
         <h2>Custom Styles</h2>
         <p class="expect">
             All of the custom properties have been overridden.
         </p>
         <qnc-help-tip
-            data-popover-html="<div style='height: 4000px; background: repeating-linear-gradient(
+            data-popover-html="Testing<div style='height: 4000px; background: repeating-linear-gradient(
                     to bottom,
                     #ef4444 0px,
                     #ef4444 20px,
@@ -233,6 +247,8 @@
                 --qncht-connector-width: 40;
                 --qncht-connector-height: 40;
                 --qncht-filter: none;
+                --qncht-color: green;
+                --qncht-font: 30px monospace;
             "
         >
             keyboard to close

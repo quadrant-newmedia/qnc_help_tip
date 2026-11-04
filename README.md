@@ -23,6 +23,8 @@ Plain-text help:
 </qnc-help-tip>
 ```
 
+Note: plain-text popovers use `white-space: pre-wrap;`, which is how native `alert()` dialogs work.
+
 HTML help:
 
 ```html
@@ -39,7 +41,7 @@ HTML help:
 - The popover is created lazily, appended to `<body>`, and destroyed when closed. Its structure is:
 
   ```html
-  <div class="qnc-help-tip-popover" popover="auto">
+  <div popover="auto">
       <div><!-- content; this inner div is the scroll container --></div>
   </div>
   ```
@@ -75,7 +77,7 @@ Feel free to override. Note: the actual rule we apply uses `:where(qnc-help-tip[
 
 ### The popover
 
-The following custom properties can all be set on `.qnc-help-tip`, but impact the popover:
+The following custom properties can all be set on `<qnc-help-tip>`, but impact the popover:
 
 | property | default | description | 
 | - | - | - |
@@ -84,6 +86,8 @@ The following custom properties can all be set on `.qnc-help-tip`, but impact th
 | --qncht-padding |  5px 10px |  anything accepted by `padding`; the padding inside the popover  | 
 | --qncht-min-width |  400px | any css length; see "Sizing" section | 
 | --qncht-max-width |  400px | any css length; see "Sizing" section |
+| --qncht-font | inherit | anything accepted by `font` |
+| --qncht-color | black | anything accepted by `color` |
 | --qncht-border |  1px solid black | anything accepted by `border`; we recommend a solid border, because it the connector triangle is generated via SVG and always uses a solid border (matching the color and width of the main border) | 
 | --qncht-border-radius |  5px | anything accepted by `border-radius` | 
 | --qncht-background |  white | anything accepted by `background`; we recommend a solid background, because it will be "copied" into the connector triangle | 
