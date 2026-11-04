@@ -6,9 +6,14 @@
     <title>qnc-help-tip manual tests</title>
     <script type="module" src="/dist/qnc_help_tip.js"></script>
     <style>
+        html {
+            height: 100%;
+        }
         body {
+            height: 100%;
             margin: 0;
             font-family: sans-serif;
+            overflow: scroll;
         }
         h2 {
             font-size: 1em;
@@ -45,6 +50,7 @@
     </style>
 </head>
 <body>
+    <div style="overflow: scroll; height: 100%;">
     <!-- Test 1 is deliberately the first thing on the page, with no space above it -->
     <div class="test" style="padding-top: 0">
         <qnc-help-tip
@@ -265,6 +271,6 @@ D: this line should wrap afaf af faff faf af afafa af affa fafa f fafaf af af af
     <div class="spacer"></div>
 
 
-
+</div>
 </body>
 </html>

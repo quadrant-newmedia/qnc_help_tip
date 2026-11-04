@@ -427,7 +427,7 @@ function append_connector(
             connector.remove();
         } else position_connector();
     };
-    window.addEventListener("scroll", onscroll);
+    window.addEventListener("scroll", onscroll, true);
 
     position_connector();
 }
