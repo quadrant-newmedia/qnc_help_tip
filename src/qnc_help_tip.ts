@@ -350,7 +350,7 @@ function append_connector(
     );
 
     const bubble_style = getComputedStyle(bubble);
-    const { connector_width, connector_height, background } = styles;
+    const { connector_width, connector_height } = styles;
     const border_width = parseFloat(bubble_style.borderBottomWidth);
     const border_radius = parseInt(bubble_style.borderRadius);
     const border_color = bubble_style.borderBottomColor;
