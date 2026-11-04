@@ -49,6 +49,11 @@ HTML help:
 - It is a `popover="auto"` popover, so it closes on external click or pressing Escape. It is not modal and does not block scrolling.
 - It is anchored with CSS anchor positioning: centered above the help tip, flipping below when there is not enough room, and staying attached while scrolling.
 
+## Styling Tips
+
+1. Keep a small amount of padding-right on the .qnc-help-tip-popover-scroller; otherwise italic text might get cut off slightly.
+2. Put all of the padding on the .qnc-help-tip-popover-scroller if you want content to render tight-to-the-border when scrolling. Otherwise, put (most of) the padding on the .qnc-help-tip-popover (while still respecting the previous rule).
+
 ## Styling
 
 ### The target element

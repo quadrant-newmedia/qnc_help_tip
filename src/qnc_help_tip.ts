@@ -87,21 +87,25 @@ style_sheet.replaceSync(`
     :where(qnc-help-tip) {
         --qncht-h-margin: 12px;
         --qncht-v-margin: 12px;
-        --qncht-padding: 5px 10px;
-        --qncht-min-width: 0px;
-        --qncht-max-width: 400px;
-        --qncht-border: 1px solid black;
-        --qncht-border-radius: 5px;
-        --qncht-background: white;
-        --qncht-color: black;
-        --qncht-font: inherit;
         --qncht-connector-width: 9;
         --qncht-connector-height: 12;
-        --qncht-filter: drop-shadow(gray 0 0 3px);
+        --qncht-min-width: 0px;
+        --qncht-max-width: 400px;
     }
     :where(qnc-help-tip[open]) {
         text-decoration: underline dotted;
     }
+    :where(.qnc-help-tip-popover) {
+        filter: drop-shadow(gray 0 0 3px);
+    }
+    :where(.qnc-help-tip-bubble) {
+        padding: 5px 10px;
+        border: 1px solid black;
+        border-radius: 5px;
+        background: white;
+    }
+    :where(.qnc-help-tip-scroller) {
+    } 
 `);
 document.adoptedStyleSheets.push(style_sheet);
 
@@ -134,17 +138,10 @@ function parse_styles(qnc_help_tip: HTMLElement) {
     return {
         h_margin: normalize_length("--qncht-h-margin"),
         v_margin: normalize_length("--qncht-v-margin"),
-        padding: style.getPropertyValue("--qncht-padding"),
         min_width: normalize_length("--qncht-min-width"),
         max_width: normalize_length("--qncht-max-width"),
-        border: style.getPropertyValue("--qncht-border"),
-        border_radius: style.getPropertyValue("--qncht-border-radius"),
-        background: style.getPropertyValue("--qncht-background"),
-        color: style.getPropertyValue("--qncht-color"),
-        font: style.getPropertyValue("--qncht-font"),
         connector_width: require_number("--qncht-connector-width"),
         connector_height: require_number("--qncht-connector-height"),
-        filter: style.getPropertyValue("--qncht-filter"),
     };
 }
 type Styles = ReturnType<typeof parse_styles>;
@@ -233,6 +230,8 @@ export class QncHelpTip extends HTMLElement {
 
         const target_rect = this.getBoundingClientRect();
         const popover = document.createElement("div");
+        const bubble = document.createElement("div");
+        const scroller = document.createElement("div");
         popover.setAttribute("popover", "auto");
 
         /* 
@@ -243,6 +242,9 @@ export class QncHelpTip extends HTMLElement {
 
         const max_available_width = `calc( ${document.documentElement.clientWidth}px - 2 * ${styles.h_margin})`;
 
+        popover.classList.add("qnc-help-tip-popover");
+        const extra_class = this.getAttribute("data-popover-class");
+        if (extra_class) popover.classList.add(extra_class);
         popover.setAttribute(
             "style",
             `
@@ -256,23 +258,34 @@ export class QncHelpTip extends HTMLElement {
                 display: flex;
                 flex-direction: column;
                 min-width: min(${styles.min_width}, ${max_available_width});
-                width: auto;
                 max-width: min(${styles.max_width}, ${max_available_width});
                 max-height: ${max_available_height};
                 margin: ${styles.v_margin} ${styles.h_margin};
                 margin-bottom: ${styles.connector_height}px;
-                padding: ${styles.padding};
-                border: ${styles.border};
-                border-radius: ${styles.border_radius};
-                filter: ${styles.filter};
-                background: ${styles.background};
-                color: ${styles.color};
-                font: ${styles.font};
-                white-space: pre-wrap;
+
+                padding: 0;
+                border: none;
+                border-radius: 0;
+                background: transparent;
             `,
         );
 
-        const scroller = document.createElement("div");
+        bubble.classList.add("qnc-help-tip-bubble");
+        bubble.setAttribute(
+            "style",
+            `
+            overflow: hidden;
+            min-width: 0; 
+            min-height: 0;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            white-space: pre-wrap;
+        `,
+        );
+        popover.appendChild(bubble);
+
+        scroller.classList.add("qnc-help-tip-scroller");
         scroller.setAttribute(
             "style",
             `
@@ -280,7 +293,7 @@ export class QncHelpTip extends HTMLElement {
                 flex-grow: 1;
             `,
         );
-        popover.appendChild(scroller);
+        bubble.appendChild(scroller);
         const html = this.getAttribute("data-popover-html");
         if (html !== null) {
             scroller.innerHTML = html;
@@ -318,7 +331,7 @@ export class QncHelpTip extends HTMLElement {
         }
         popover.showPopover(options);
 
-        append_connector(this, popover, styles);
+        append_connector(this, popover, bubble, styles);
     }
 }
 
@@ -328,6 +341,7 @@ export class QncHelpTip extends HTMLElement {
 function append_connector(
     help_tip: HTMLElement,
     popover: HTMLElement,
+    bubble: HTMLElement,
     styles: Styles,
 ) {
     const connector = document.createElementNS(
@@ -335,12 +349,12 @@ function append_connector(
         "svg",
     );
 
-    const popover_style = getComputedStyle(popover);
+    const bubble_style = getComputedStyle(bubble);
     const { connector_width, connector_height, background } = styles;
-    const border_width = parseFloat(popover_style.borderBottomWidth);
-    const border_radius = parseInt(popover_style.borderRadius);
-    const border_color = popover_style.borderBottomColor;
-    const background_color = popover_style.backgroundColor;
+    const border_width = parseFloat(bubble_style.borderBottomWidth);
+    const border_radius = parseInt(bubble_style.borderRadius);
+    const border_color = bubble_style.borderBottomColor;
+    const background_color = bubble_style.backgroundColor;
 
     // Some basic geometry gives...
     const Y = connector_width / 2;
@@ -397,13 +411,13 @@ function append_connector(
 
         if (popover_rect.top < target_rect.top) {
             // popover is above target
-            connector.style.top = "100%";
+            connector.style.top = `calc( 100% - ${border_width}px )`;
             connector.style.bottom = "";
             connector.style.transform = "translateX(-50%)";
         } else {
             // popover is below target
             connector.style.top = "";
-            connector.style.bottom = "100%";
+            connector.style.bottom = `calc( 100% - ${border_width}px )`;
             connector.style.transform = "rotateZ(180deg) translateX(-50%)";
         }
     };

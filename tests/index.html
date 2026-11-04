@@ -162,7 +162,7 @@
             Expect: the popover fits within the viewport and scrolls vertically. When the target is vertically centered in the viewport, the popover expands to fill entire viewport height, covering the target (we might change this behaviour in the future).
         </p>
         <qnc-help-tip
-            data-popover-html="<div style='height: 4000px; background: repeating-linear-gradient(
+            data-popover-html="<div style='height: 4000px; width: 200px; background: repeating-linear-gradient(
                     to bottom,
                     #ef4444 0px,
                     #ef4444 20px,
@@ -206,8 +206,6 @@
         </qnc-help-tip>
     </div>
 
-
-
     <div class="test">
         <h2>White-space preserving</h2>
         <p class="expect">
@@ -226,7 +224,22 @@ D: this line should wrap afaf af faff faf af afafa af affa fafa f fafaf af af af
         <p class="expect">
             All of the custom properties have been overridden.
         </p>
+        <style>
+            .custom-popover {
+                filter: none;
+
+            }
+            .custom-popover > .qnc-help-tip-bubble {
+                padding: 2px;
+                border: 6px solid red;
+                border-radius: 20px;
+                background: yellow;
+                color: green;
+
+            }
+        </style>
         <qnc-help-tip
+            data-popover-class="custom-popover"
             data-popover-html="Testing<div style='height: 4000px; background: repeating-linear-gradient(
                     to bottom,
                     #ef4444 0px,
@@ -238,17 +251,10 @@ D: this line should wrap afaf af faff faf af afafa af affa fafa f fafaf af af af
             style="
                 --qncht-h-margin: 100px;
                 --qncht-v-margin: 100px;
-                --qncht-padding: 0px 20px;
                 --qncht-min-width: 200px;
                 --qncht-max-width: 200px;
-                --qncht-border: 6px solid red;
-                --qncht-border-radius: 20px;
-                --qncht-background: yellow;
                 --qncht-connector-width: 40;
                 --qncht-connector-height: 40;
-                --qncht-filter: none;
-                --qncht-color: green;
-                --qncht-font: 30px monospace;
             "
         >
             keyboard to close
