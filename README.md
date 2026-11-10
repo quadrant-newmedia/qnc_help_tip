@@ -1,17 +1,14 @@
 # qnc_help_tip
-<!-- cspell: words qncht unitless -->
+<!-- cspell: words qncht unitless scroller beforetoggle -->
 
 `<qnc-help-tip>` is a dependency-free custom element for adding help popovers to inline text. It uses the native HTML Popover API and CSS anchor positioning.
 
 ## Usage
 
-Import the module (it registers the element) and the default stylesheet:
+Import the module (it registers the element):
 
 ```html
 <script type="module" src="/dist/qnc_help_tip.js"></script>
-<!-- We actually recommend you use something like esbuild and @import our stylesheet into your base stylesheet -->
-<!-- Note: you _may_ omit this, as long as you review it and add equivalent/conforming styles to your stylesheet -->
-<link rel="stylesheet" href="node_modules/@qnc/qnc_help_tip/qnc_help_tip.css">
 ```
 
 Plain-text help:
@@ -103,11 +100,11 @@ qnc-help-tip {
 } 
 ```
 
-*Note: our styles actually use `:where(...)` selectors, so that they have 0 specificity. If you use the selectors we've suggested above, your styles will win.
+*Note: our styles actually use `:where(...)` selectors, so that they have 0 specificity. If you use the selectors we've suggested above, your styles will override ours.
 
-Note that we set various *other* styles directly in the style attributes of these elements. Those styles are *not* meant to be overridden.
+Note that we set various *other* styles directly in the style attributes of these elements. The inline styles are *not* meant to be overridden.
 
-The custom properties on `<qnc-help-tip>` actually impact the popover:
+The custom properties on `<qnc-help-tip>` actually impact the popover, as follows:
 
 | property | default | description | 
 | - | - | - |
@@ -159,7 +156,7 @@ Vertically, the popover takes up as much space as needed. We ensure it stays sho
 
 ## Programmatic control
 
-- The `open` attribute and `open` property work like those of `<details>`. Setting the attribute in HTML opens the popover on load, which may cause a flash of unstyled content.
+- The `open` attribute and `open` property work like those of `<details>`. Notice: setting the open attribute in HTML opens the popover on page load, which may cause a flash of unstyled content.
 - A `toggle` event (bubbling, not cancelable) is dispatched after the open state changes. There is no `beforetoggle`.
 
 ## Browser support
